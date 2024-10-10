@@ -1,0 +1,6 @@
+# ignore everything except for the required files to run, stops any
+# erroneous config / output files being bundled in the built image
+/**
+!/s3_upload/
+!/tests
+!/requirements.txt
