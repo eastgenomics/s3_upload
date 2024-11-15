@@ -88,7 +88,7 @@ Each dictionary inside of the list to monitor allows for setting separate upload
 *Example `monitor` config section defining two sets of monitored directories and upload locations*
 
 
-## Authentication
+## AWS Authentication
 
 Authentication with AWS may be performed either via SSO / IAM or with specified access keys. If using SSO / IAM, it must first be configured using the [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html#sso-configure-profile-token-auto-sso), and then the profile being used set to the environment variable `AWS_DEFAULT_PROFILE`. If this is specified the uploader will attempt to authenticate using this profile which must have permission to access the specified S3 bucket. If using access keys, both the environment variables `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` must be set, and these will be used for authentication. If running via the provided Docker image these may be set using `--env` or `--env-file`.
 
@@ -157,6 +157,13 @@ optional arguments:
 
 > [!IMPORTANT]
 > Both the `--local_path` for single run upload, and `monitored_directories` paths for monitoring, must be relative to where they are mounted into the container (i.e. if you mount the sequencer output to `/sequencer_output/` then your paths would be `--local_path /sequencer_output/run_A/` and `/sequencer_output/` for single upload and monitoring, respectively). In addition, for monitoring you must ensure to mount the log directory outside of the container to be persistent (i.e. using the default log location: `--volume /local/log/dir:/var/log/s3_upload`. If this is not done when the container shuts down, all runs will be identified as new on the next upload run and will attempt to be uploaded.)
+
+
+## Tests
+
+Comprehensive unit tests have been written in [tests/unit](https://github.com/eastgenomics/s3_upload/tree/main/tests/unit) for all the core functionality of the uploader. These are configured to run with PyTest on every change with [GitHub actions](https://github.com/eastgenomics/s3_upload/blob/main/.github/workflows/pytest.yml).
+
+Several [end to end test scenarios](https://github.com/eastgenomics/s3_upload/tree/main/tests/e2e) have also been written to provide robust and automated end to end testing. These are currently not configured to run via GitHub actions due to requiring authentication with AWS. Details on running the tests may be found in the [e2e test readme](https://github.com/eastgenomics/s3_upload/blob/main/tests/e2e/README.md). These should be run locally when changes are made and updated accordingly.
 
 
 ## Notes
