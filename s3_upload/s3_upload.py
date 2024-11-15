@@ -278,7 +278,11 @@ def monitor_directories_for_upload(config, dry_run):
         # simple timer to log total upload time
         start = timer()
 
-        all_run_files = get_sequencing_file_list(run_config["run_dir"])
+        all_run_files = get_sequencing_file_list(
+            seq_dir=run_config["run_dir"],
+            exclude_patterns=run_config.get("exclude_patterns"),
+        )
+
         files_to_upload = all_run_files.copy()
 
         if run_config.get("uploaded_files"):
