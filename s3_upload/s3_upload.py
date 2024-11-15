@@ -216,6 +216,9 @@ def monitor_directories_for_upload(config, dry_run):
                     "parent_path": Path(run_dir).parent,
                     "bucket": monitor_dir_config["bucket"],
                     "remote_path": monitor_dir_config["remote_path"],
+                    "exclude_patterns": monitor_dir_config.get(
+                        "exclude_patterns"
+                    ),
                 }
             )
 
@@ -278,7 +281,11 @@ def monitor_directories_for_upload(config, dry_run):
         # simple timer to log total upload time
         start = timer()
 
-        all_run_files = get_sequencing_file_list(run_config["run_dir"])
+        all_run_files = get_sequencing_file_list(
+            seq_dir=run_config["run_dir"],
+            exclude_patterns=run_config.get("exclude_patterns"),
+        )
+
         files_to_upload = all_run_files.copy()
 
         if run_config.get("uploaded_files"):

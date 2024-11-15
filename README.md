@@ -57,6 +57,7 @@ Monitoring of specified directories for sequencing runs to upload are defined in
 * `bucket` (`str` | required): name of S3 bucket to upload to
 * `remote_path` (`str` | required): parent path in which to upload sequencing run directories in the specified bucket
 * `sample_regex` (`str` | optional): regex pattern to match against all samples parsed from the samplesheet, all samples must match this pattern to upload the run. This is to be used for controlling upload of specific runs where samplenames inform the assay / test.
+* `exclude_patterns` (`list` | optional): list of directory / filename regex patterns of which to exclude from uploading (e.g. [".*png"] would exclude the PNGs from Thumbnail_Images/ from being uploaded)
 
 Each dictionary inside of the list to monitor allows for setting separate upload locations for each of the monitored directories. For example, in the below codeblock the output of both `sequencer_1` and `sequencer_2` would be uploaded to the root of `bucket_A`, and the output of `sequencer_3` would be uploaded into `sequencer_3_runs` in `bucket_B`. Any number of these dictionaries may be defined in the monitor list.
 
@@ -76,14 +77,18 @@ Each dictionary inside of the list to monitor allows for setting separate upload
                 "/absolute/path/to/sequencer_3"
             ],
             "bucket": "bucket_B",
-            "remote_path": "/sequencer_3_runs"
+            "remote_path": "/sequencer_3_runs",
+            "exclude_patterns": [
+                "Config/",
+                ".*png"
+            ]
         }
     ]
 ```
 *Example `monitor` config section defining two sets of monitored directories and upload locations*
 
 
-## Authentication
+## AWS Authentication
 
 Authentication with AWS may be performed either via SSO / IAM or with specified access keys. If using SSO / IAM, it must first be configured using the [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html#sso-configure-profile-token-auto-sso), and then the profile being used set to the environment variable `AWS_DEFAULT_PROFILE`. If this is specified the uploader will attempt to authenticate using this profile which must have permission to access the specified S3 bucket. If using access keys, both the environment variables `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` must be set, and these will be used for authentication. If running via the provided Docker image these may be set using `--env` or `--env-file`.
 
@@ -152,6 +157,13 @@ optional arguments:
 
 > [!IMPORTANT]
 > Both the `--local_path` for single run upload, and `monitored_directories` paths for monitoring, must be relative to where they are mounted into the container (i.e. if you mount the sequencer output to `/sequencer_output/` then your paths would be `--local_path /sequencer_output/run_A/` and `/sequencer_output/` for single upload and monitoring, respectively). In addition, for monitoring you must ensure to mount the log directory outside of the container to be persistent (i.e. using the default log location: `--volume /local/log/dir:/var/log/s3_upload`. If this is not done when the container shuts down, all runs will be identified as new on the next upload run and will attempt to be uploaded.)
+
+
+## Tests
+
+Comprehensive unit tests have been written in [tests/unit](https://github.com/eastgenomics/s3_upload/tree/main/tests/unit) for all the core functionality of the uploader. These are configured to run with PyTest on every change with [GitHub actions](https://github.com/eastgenomics/s3_upload/blob/main/.github/workflows/pytest.yml).
+
+Several [end to end test scenarios](https://github.com/eastgenomics/s3_upload/tree/main/tests/e2e) have also been written to provide robust and automated end to end testing. These are currently not configured to run via GitHub actions due to requiring authentication with AWS. Details on running the tests may be found in the [e2e test readme](https://github.com/eastgenomics/s3_upload/blob/main/tests/e2e/README.md). These should be run locally when changes are made and updated accordingly.
 
 
 ## Notes
