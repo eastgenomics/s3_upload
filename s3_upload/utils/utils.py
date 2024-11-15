@@ -287,7 +287,13 @@ def get_sequencing_file_list(seq_dir, exclude_patterns=None) -> list:
         reverse=True,
     )
 
+    log.info("Found %s files in directory", len(files))
+
     if exclude_patterns:
+        log.info(
+            "Excluding files to upload against provided pattern(s): %s",
+            exclude_patterns,
+        )
         files = [
             x
             for x in files
