@@ -216,6 +216,9 @@ def monitor_directories_for_upload(config, dry_run):
                     "parent_path": Path(run_dir).parent,
                     "bucket": monitor_dir_config["bucket"],
                     "remote_path": monitor_dir_config["remote_path"],
+                    "exclude_patterns": monitor_dir_config.get(
+                        "exclude_patterns"
+                    ),
                 }
             )
 
