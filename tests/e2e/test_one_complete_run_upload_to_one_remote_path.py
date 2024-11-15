@@ -3,8 +3,10 @@ End to end tests for running the upload in monitor mode.
 
 The below tests will fully simulate the upload process of a single
 sequencing run by setting up test run structure, calling the main entry
-point and testing the upload behaviour. This is the minimal end to end
-upload scenario to test.
+point and testing the upload behaviour. We will upload all files except
+the ThumbnailImage PNGs, which will be specified to exclude in the config.
+
+This is the minimal end to end upload scenario to test.
 """
 
 from argparse import Namespace
@@ -47,6 +49,9 @@ class TestSingleCompleteRun(unittest.TestCase):
             "CopyComplete.txt",
             "Config/Options.cfg",
             "InterOp/EventMetricsOut.bin",
+            "Recipe/HLJC5DRX5.xml"
+            "Thumbnail_Images/L001/C1.1/s_1_2103_green.png",
+            "Thumbnail_Images/L001/C1.1/s_1_2103_red.png",
         )
 
         shutil.copy(
@@ -58,7 +63,8 @@ class TestSingleCompleteRun(unittest.TestCase):
         now = datetime.now().strftime("%y%m%d_%H%M%S")
         cls.remote_path = f"s3_upload_e2e_test/{now}/sequencer_a"
 
-        # add in the sequencer to monitor with test run
+        # add in the sequencer to monitor with test run, excluding all
+        # files in the Recipe dir and all Thumbnail PNGs
         config_file = os.path.join(TEST_DATA_DIR, "test_config.json")
         config = deepcopy(BASE_CONFIG)
         config["log_dir"] = os.path.join(TEST_DATA_DIR, "logs")
@@ -69,6 +75,7 @@ class TestSingleCompleteRun(unittest.TestCase):
                 ],
                 "bucket": S3_BUCKET,
                 "remote_path": cls.remote_path,
+                "exclude_patterns": ["Recipe/", ".*png"],
             }
         )
 
@@ -114,7 +121,8 @@ class TestSingleCompleteRun(unittest.TestCase):
         """
         Test that the remote files are uploaded with the same directory
         structure as local and to the specified bucket:/path from the
-        config file
+        config file, and that we correctly exclude the specified files
+        from uploading as expected
         """
         local_files = [
             "RunInfo.xml",
