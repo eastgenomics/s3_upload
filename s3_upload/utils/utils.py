@@ -287,7 +287,7 @@ def get_sequencing_file_list(seq_dir, exclude_patterns=None) -> list:
         reverse=True,
     )
 
-    log.info("Found %s files in directory", len(files))
+    log.info("Found %s files in %s", len(files), seq_dir)
 
     if exclude_patterns:
         log.info(
