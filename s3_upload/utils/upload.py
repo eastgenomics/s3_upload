@@ -31,7 +31,7 @@ def check_aws_access(slack_alert_webhook=None):
     access to all buckets
 
     slack_alert_webhook : str
-        webhook url for sending alerts to
+        webhook URL for sending alerts to
 
     Returns
     -------
@@ -48,6 +48,10 @@ def check_aws_access(slack_alert_webhook=None):
         Raised when unable to connect to AWS
     """
     log.info("Checking access to AWS")
+
+    if not slack_alert_webhook:
+        # try get from env if not set, mostly for testing
+        slack_alert_webhook = environ.get("SLACK_ALERT_WEBHOOK")
 
     error_message = None
     slack_base_error = (
@@ -107,7 +111,7 @@ def check_aws_access(slack_alert_webhook=None):
         raise RuntimeError(f"Error in connecting to AWS: {err}") from err
 
 
-def check_buckets_exist(buckets) -> List[dict]:
+def check_buckets_exist(buckets, slack_alert_webhook=None) -> List[dict]:
     """
     Check that the provided bucket(s) exist and are accessible
 
@@ -115,6 +119,8 @@ def check_buckets_exist(buckets) -> List[dict]:
     ----------
     buckets : list
         S3 bucket(s) to check access for
+    slack_alert_webhook : str
+        webhook URL for sending alerts to
 
     Returns
     -------
@@ -127,6 +133,10 @@ def check_buckets_exist(buckets) -> List[dict]:
         Raised when one or more buckets do not exist / not accessible
     """
     log.info("Checking bucket(s) exist and accessible: %s", ", ".join(buckets))
+
+    if not slack_alert_webhook:
+        # try get from env if not set, mostly for testing
+        slack_alert_webhook = environ.get("SLACK_ALERT_WEBHOOK")
 
     valid = []
     invalid = []
@@ -148,10 +158,22 @@ def check_buckets_exist(buckets) -> List[dict]:
 
     if invalid:
         error_message = (
-            f"{len(invalid) } bucket(s) not accessible / do not exist: "
+            f"{len(invalid) } bucket(s) not accessible or do not exist: "
             f"{', '.join(invalid)}"
         )
+
+        if slack_alert_webhook:
+            slack_alert_message = (
+                ":warning:  *S3 Upload*: Error in accessing specified S3"
+                f" buckets!\n\n\t\t{error_message}"
+            )
+
+            post_slack_message(
+                url=slack_alert_webhook, message=slack_alert_message
+            )
+
         log.error(error_message)
+
         raise RuntimeError(error_message)
 
     log.debug("All buckets exist and accessible")

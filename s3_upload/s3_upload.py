@@ -1,5 +1,5 @@
 import argparse
-from os import cpu_count, makedirs, path
+from os import cpu_count, environ, makedirs, path
 from pathlib import Path
 import sys
 from timeit import default_timer as timer
@@ -195,19 +195,16 @@ def monitor_directories_for_upload(config, dry_run):
         "slack_log_webhook"
     )
 
-    if not slack_alert_webhook:
-        # try get from env if not set, mostly for testing
-        slack_alert_webhook = environ.get("SLACK_ALERT_WEBHOOK")
-
     if not log_url and not alert_url:
         log.warning(
             "Neither `slack_log_webhook` or `slack_alert_webhook` specified =>"
             " no Slack notifications will be sent"
         )
 
-    check_aws_access()
+    check_aws_access(slack_alert_webhook=alert_url)
     check_buckets_exist(
         buckets=set([x["bucket"] for x in config["monitor"]]),
+        slack_alert_webhook=alert_url,
     )
 
     cores = config.get("max_cores", cpu_count)
