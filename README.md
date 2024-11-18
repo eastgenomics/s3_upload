@@ -35,7 +35,7 @@ Available inputs for `upload`:
 
 
 Available inputs for `monitor`:
-* `--config`: path to JSON config file for monitoring (see below)
+* `--config`: path to JSON config file for monitoring (see Config section below)
 * `--dry_run` (optional): calls everything except the actual upload to check what runs would be uploaded
 
 
@@ -48,8 +48,8 @@ The top level keys that may be defined include:
 * `max_threads` (`int` | optional): the maximum number of threads to use per CPU core
 * `log_level` (`str` | optional): the level of logging to set, available options are defined [here](https://docs.python.org/3/library/logging.html#logging-levels)
 * `log_dir` (`str` | optional): path to where to store logs (default: `/var/log/s3_upload`)
-* `slack_log_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on successful uploads, will try use `slack_alert_webhook` if not specified.
-* `slack_alert_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on failed uploads, will try use `slack_log_webhook` if not specified.
+* `slack_log_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on successful uploads, will try use `slack_alert_webhook` if not specified (see [Slack](https://github.com/eastgenomics/s3_upload?tab=readme-ov-file#slack) below for details).
+* `slack_alert_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on failed uploads, will try use `slack_log_webhook` if not specified (see [Slack](https://github.com/eastgenomics/s3_upload?tab=readme-ov-file#slack) below for details).
 
 
 Monitoring of specified directories for sequencing runs to upload are defined in a list of dictionaries under the `monitor` key. The available keys per monitor dictionary include:
