@@ -95,7 +95,7 @@ Authentication with AWS may be performed either via SSO / IAM or with specified 
 Only one authentication method may be used, if both `AWS_DEFAULT_PROFILE` and `AWS_ACCESS_KEY` / `AWS_SECRET_KEY` are provided the uploader will exit and one method must be unset to continue.
 
 
-## Logging
+## :wood: Logging
 
 All logs by default are written to `/var/log/s3_upload`. Logs from stdout and stderr are written to the file `s3_upload.log`, and are on a rotating time handle at midnight and backups stored in the same directory for 5 days.
 
@@ -130,7 +130,8 @@ These benchmarks were obtained from uploading a NovaSeq S1 flowcell sequencing r
 | 4     | 4       | 0:9:23               | 85.69                          |
 | 4     | 8       | 0:9:20               | 96.0                           |
 
-## Docker
+## <img src="images/moby.png" width="18"/> Docker
+
 A Dockerfile is provided for running the upload from within a Docker container. For convenience, the tool is aliased to the command `s3_upload` in the container.
 
 To build the Docker image: `docker build -t s3_upload:<tag> .`.
@@ -159,8 +160,6 @@ optional arguments:
 > Both the `--local_path` for single run upload, and `monitored_directories` paths for monitoring, must be relative to where they are mounted into the container (i.e. if you mount the sequencer output to `/sequencer_output/` then your paths would be `--local_path /sequencer_output/run_A/` and `/sequencer_output/` for single upload and monitoring, respectively). In addition, for monitoring you must ensure to mount the log directory outside of the container to be persistent (i.e. using the default log location: `--volume /local/log/dir:/var/log/s3_upload`. If this is not done when the container shuts down, all runs will be identified as new on the next upload run and will attempt to be uploaded.)
 
 
-<!-- ## ![slack_logo](images/slack.png) -->
-
 ## <img src="images/slack.png" width="18"/> Slack
 
 Currently, notifications are able to be sent via the use of Slack webhooks. These include log notifications for when run(s) complete uploading, as well as alerts for if upload(s) fail, or if authentication to AWS fails. Use of Slack notifications is optional, and all alerts will still go to the log file by default if not configured.
@@ -168,18 +167,18 @@ Currently, notifications are able to be sent via the use of Slack webhooks. Thes
 To enable Slack notifications, one or both of the keys `slack_log_webhook` and `slack_alert_webhook` should be added to the config file. If both are defined, notifications of complete uploads will be sent to `slack_log_webhook` and any errors / failures will be sent to `slack_alert_webhook`. If only one is defined, all notifications will be sent to that single endpoint.
 
 
-## Tests
+## :hammer_and_wrench: Tests
 
 Comprehensive unit tests have been written in [tests/unit](https://github.com/eastgenomics/s3_upload/tree/main/tests/unit) for all the core functionality of the uploader. These are configured to run with PyTest on every change with [GitHub actions](https://github.com/eastgenomics/s3_upload/blob/main/.github/workflows/pytest.yml).
 
 Several [end to end test scenarios](https://github.com/eastgenomics/s3_upload/tree/main/tests/e2e) have also been written to provide robust and automated end to end testing. These are currently not configured to run via GitHub actions due to requiring authentication with AWS. Details on running the tests may be found in the [e2e test readme](https://github.com/eastgenomics/s3_upload/blob/main/tests/e2e/README.md). These should be run locally when changes are made and updated accordingly.
 
 
-## Notes
+## :pen: Notes
 * When running in monitor mode, a file lock is acquired on `s3_upload.lock`, which by default will be written into the log directory. This ensures only a single upload process may run at once, preventing duplicate concurrent uploads of the same files.
 
 
-## Pre-commit Hooks
+## :hook: Pre-commit Hooks
 For development pre-commit hooks are setup to enable secret scanning using [Yelp/detect-secrets](https://github.com/Yelp/detect-secrets?tab=readme-ov-file), this will attempt to prevent accidentally committing anything that may be sensitive (i.e. AWS credentials).
 
 This requires first installing [pre-commit](https://pre-commit.com/) and [detect-secrets](https://github.com/Yelp/detect-secrets?tab=readme-ov-file#installation), both may be installed with pip:
