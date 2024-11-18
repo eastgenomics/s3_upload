@@ -8,7 +8,7 @@ There are 2 modes implemented, one to interactively upload a single sequencing r
 
 All behaviour for the monitor mode is controlled by a JSON config file (described [below](https://github.com/eastgenomics/s3_upload?tab=readme-ov-file#config)). It is intended to be set up to run on a schedule and monitor one or more directories for newly completed sequencing runs and automatically upload to specified AWS S3 bucket(s) and remote path(s). Multiple local and remote paths may be specified to monitor the output of multiple sequencers. Runs to upload may currently be filtered with regex patterns to match against the samples parsed from the samplesheet, where the sample names are informative of the assay / experiment to be uploaded.
 
-## Usage
+## :desktop_computer: Usage
 
 Uploading a single run:
 ```
@@ -23,7 +23,7 @@ Adding to a crontab for hourly monitoring:
 ```
 
 
-## Inputs
+## :page_facing_up: Inputs
 
 Available inputs for `upload`:
 * `--local_path` (required): path to sequencing run to upload
@@ -39,7 +39,7 @@ Available inputs for `monitor`:
 * `--dry_run` (optional): calls everything except the actual upload to check what runs would be uploaded
 
 
-## Config
+## :gear: Config
 
 The behaviour for monitoring of directories for sequencing runs to upload is controlled through the use of a JSON config file. An example may be found [here](https://github.com/eastgenomics/s3_upload/blob/main/example/example_config.json).
 
@@ -88,7 +88,7 @@ Each dictionary inside of the list to monitor allows for setting separate upload
 *Example `monitor` config section defining two sets of monitored directories and upload locations*
 
 
-## AWS Authentication
+## :closed_lock_with_key: AWS Authentication
 
 Authentication with AWS may be performed either via SSO / IAM or with specified access keys. If using SSO / IAM, it must first be configured using the [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html#sso-configure-profile-token-auto-sso), and then the profile being used set to the environment variable `AWS_DEFAULT_PROFILE`. If this is specified the uploader will attempt to authenticate using this profile which must have permission to access the specified S3 bucket. If using access keys, both the environment variables `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` must be set, and these will be used for authentication. If running via the provided Docker image these may be set using `--env` or `--env-file`.
 
@@ -116,7 +116,7 @@ The expected fields in this log file are:
 * `uploaded_files` (`dict`) - mapping of filename to ETag ID of successfully uploaded files
 
 
-## Benchmarks
+## :dash: Benchmarks
 A small [benchmarking script](https://github.com/eastgenomics/s3_upload/blob/main/scripts/benchmark.py) has been written to be able to repeatedly call the uploader with a set number of cores and threads at once to determine the optimal setting for upload time and available compute. It will iterate through combinations of the provided cores and threads, uploading a given run directory and automatically deleting the uploaded files on completion. Results are then written to a file `s3_upload_benchmark_{datetime}.tsv` in the current directory. This allows for measuring the total upload time and maximum resident set size (i.e. peak memory usage). This is using the [memory-profiler](https://pypi.org/project/memory-profiler/) package to measure combined memory usage of all spawned child processes to run the upload.
 
 The below benchmarks were output from running the script with the following arguments: `python3 scripts/benchmark.py --local_path /genetics/A01295b/241023_A01295_0432_BHK3NFDRX5 --cores 1 2 3 4 --threads 1 2 4 8 --bucket s3-upload-benchmarking`.
@@ -130,7 +130,7 @@ These benchmarks were obtained from uploading a NovaSeq S1 flowcell sequencing r
 | 4     | 4       | 0:9:23               | 85.69                          |
 | 4     | 8       | 0:9:20               | 96.0                           |
 
-## <img src="images/moby.png" width="18"/> Docker
+## <img src="images/moby.png" width="20"/> Docker
 
 A Dockerfile is provided for running the upload from within a Docker container. For convenience, the tool is aliased to the command `s3_upload` in the container.
 
