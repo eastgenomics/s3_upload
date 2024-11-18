@@ -1,3 +1,5 @@
+"""Functions for posting Slack notifications"""
+
 import json
 import requests
 
