@@ -1,5 +1,5 @@
 import argparse
-from os import cpu_count, environ, makedirs, path
+from os import cpu_count, makedirs, path
 from pathlib import Path
 import sys
 from timeit import default_timer as timer
