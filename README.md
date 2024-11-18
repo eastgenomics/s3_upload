@@ -161,7 +161,7 @@ optional arguments:
 
 <!-- ## ![slack_logo](images/slack.png) -->
 
-## <img src="images/slack.png" width="20"/> Slack
+## <img src="images/slack.png" width="18"/> Slack
 
 Currently, notifications are able to be sent via the use of Slack webhooks. These include log notifications for when run(s) complete uploading, as well as alerts for if upload(s) fail, or if authentication to AWS fails. Use of Slack notifications is optional, and all alerts will still go to the log file by default if not configured.
 
