@@ -274,7 +274,7 @@ class TestConfigRegexPatternsAgainstSampleNames(unittest.TestCase):
 
         with self.subTest("message formatted as expected"):
             expected_message = (
-                ":white_check_mark: S3 Upload: Successfully uploaded 2"
+                ":white_check_mark:  *S3 Upload*: Successfully uploaded 2"
                 " runs\n\t:black_square: run_1\n\t:black_square: run_2"
             )
 

@@ -7,9 +7,7 @@ import boto3
 from botocore import exceptions as s3_exceptions
 import pytest
 
-
 from s3_upload.utils import upload
-from unit import TEST_DATA_DIR
 
 
 @patch("s3_upload.utils.upload.boto3.Session")
@@ -48,19 +46,25 @@ class TestCheckAwsAccess(unittest.TestCase):
     @patch("s3_upload.utils.upload.AWS_DEFAULT_PROFILE", "baz")
     def test_system_exit_raised_when_all_env_variables_set(self, mock_s3):
         expected_error = (
-            "Invalid environment variables for authentication method specified"
+            "Both `AWS_DEFAULT_PROFILE` provided as well as `AWS_ACCESS_KEY`"
+            " and / or `AWS_SECRET_KEY`. Only one authentication method may be"
+            " used."
         )
 
-        with pytest.raises(SystemExit, match=expected_error):
+        with pytest.raises(SystemExit, match=re.escape(expected_error)):
             upload.check_aws_access()
 
     @patch("s3_upload.utils.upload.AWS_ACCESS_KEY", None)
     @patch("s3_upload.utils.upload.AWS_SECRET_KEY", None)
     @patch("s3_upload.utils.upload.AWS_DEFAULT_PROFILE", None)
     def test_system_exit_raised_when_no_env_variables_set(self, mock_s3):
-        expected_error = "AWS authentication credentials not provided"
+        expected_error = (
+            "Required environment variables for AWS authentication not"
+            " defined. Requires either `AWS_DEFAULT_PROFILE` or"
+            " `AWS_ACCESS_KEY` and `AWS_SECRET_KEY`."
+        )
 
-        with pytest.raises(SystemExit, match=expected_error):
+        with pytest.raises(SystemExit, match=re.escape(expected_error)):
             upload.check_aws_access()
 
 
@@ -108,7 +112,7 @@ class TestCheckBucketsExist(unittest.TestCase):
         ]
 
         expected_error = (
-            "2 bucket(s) not accessible / do not exist: invalid_bucket_1,"
+            "2 bucket(s) not accessible or do not exist: invalid_bucket_1,"
             " invalid_bucket_2"
         )
 
@@ -122,7 +126,7 @@ class TestCheckBucketsExist(unittest.TestCase):
             {"Error": {"Code": 1, "Message": "foo"}}, "bar"
         )
 
-        expected_error = "1 bucket(s) not accessible / do not exist: s3-test"
+        expected_error = "1 bucket(s) not accessible or do not exist: s3-test"
 
         with pytest.raises(RuntimeError, match=re.escape(expected_error)):
             upload.check_buckets_exist(["s3-test"])

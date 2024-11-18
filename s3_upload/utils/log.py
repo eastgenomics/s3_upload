@@ -1,3 +1,5 @@
+"""Functions to handle log streams"""
+
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os

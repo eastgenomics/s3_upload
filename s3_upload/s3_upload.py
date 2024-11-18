@@ -187,9 +187,24 @@ def monitor_directories_for_upload(config, dry_run):
     """
     log.info("Beginning monitoring directories for runs to upload")
 
-    check_aws_access()
+    # preferentially use respective log and alert channel webhooks if specified
+    log_url = config.get("slack_log_webhook") or config.get(
+        "slack_alert_webhook"
+    )
+    alert_url = config.get("slack_alert_webhook") or config.get(
+        "slack_log_webhook"
+    )
+
+    if not log_url and not alert_url:
+        log.warning(
+            "Neither `slack_log_webhook` or `slack_alert_webhook` specified =>"
+            " no Slack notifications will be sent"
+        )
+
+    check_aws_access(slack_alert_webhook=alert_url)
     check_buckets_exist(
         buckets=set([x["bucket"] for x in config["monitor"]]),
+        slack_alert_webhook=alert_url,
     )
 
     cores = config.get("max_cores", cpu_count)
@@ -350,20 +365,6 @@ def monitor_directories_for_upload(config, dry_run):
         len(runs_successfully_uploaded),
         len(runs_failed_upload),
     )
-
-    # preferentially use respective log and alert channel webhooks if specified
-    log_url = config.get("slack_log_webhook") or config.get(
-        "slack_alert_webhook"
-    )
-    alert_url = config.get("slack_alert_webhook") or config.get(
-        "slack_log_webhook"
-    )
-
-    if not log_url and not alert_url:
-        log.debug(
-            "Neither `slack_log_webhook` or `slack_alert_webhook` specified =>"
-            " no Slack notifications to send"
-        )
 
     if runs_successfully_uploaded and log_url:
         log.debug(

@@ -8,7 +8,7 @@ There are 2 modes implemented, one to interactively upload a single sequencing r
 
 All behaviour for the monitor mode is controlled by a JSON config file (described [below](https://github.com/eastgenomics/s3_upload?tab=readme-ov-file#config)). It is intended to be set up to run on a schedule and monitor one or more directories for newly completed sequencing runs and automatically upload to specified AWS S3 bucket(s) and remote path(s). Multiple local and remote paths may be specified to monitor the output of multiple sequencers. Runs to upload may currently be filtered with regex patterns to match against the samples parsed from the samplesheet, where the sample names are informative of the assay / experiment to be uploaded.
 
-## Usage
+## :desktop_computer: Usage
 
 Uploading a single run:
 ```
@@ -23,7 +23,7 @@ Adding to a crontab for hourly monitoring:
 ```
 
 
-## Inputs
+## :page_facing_up: Inputs
 
 Available inputs for `upload`:
 * `--local_path` (required): path to sequencing run to upload
@@ -35,11 +35,11 @@ Available inputs for `upload`:
 
 
 Available inputs for `monitor`:
-* `--config`: path to JSON config file for monitoring (see below)
+* `--config`: path to JSON config file for monitoring (see Config section below)
 * `--dry_run` (optional): calls everything except the actual upload to check what runs would be uploaded
 
 
-## Config
+## :gear: Config
 
 The behaviour for monitoring of directories for sequencing runs to upload is controlled through the use of a JSON config file. An example may be found [here](https://github.com/eastgenomics/s3_upload/blob/main/example/example_config.json).
 
@@ -48,8 +48,8 @@ The top level keys that may be defined include:
 * `max_threads` (`int` | optional): the maximum number of threads to use per CPU core
 * `log_level` (`str` | optional): the level of logging to set, available options are defined [here](https://docs.python.org/3/library/logging.html#logging-levels)
 * `log_dir` (`str` | optional): path to where to store logs (default: `/var/log/s3_upload`)
-* `slack_log_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on successful uploads, will try use `slack_alert_webhook` if not specified.
-* `slack_alert_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on failed uploads, will try use `slack_log_webhook` if not specified.
+* `slack_log_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on successful uploads, will try use `slack_alert_webhook` if not specified (see [Slack](https://github.com/eastgenomics/s3_upload?tab=readme-ov-file#slack) below for details).
+* `slack_alert_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on failed uploads, will try use `slack_log_webhook` if not specified (see [Slack](https://github.com/eastgenomics/s3_upload?tab=readme-ov-file#slack) below for details).
 
 
 Monitoring of specified directories for sequencing runs to upload are defined in a list of dictionaries under the `monitor` key. The available keys per monitor dictionary include:
@@ -57,7 +57,7 @@ Monitoring of specified directories for sequencing runs to upload are defined in
 * `bucket` (`str` | required): name of S3 bucket to upload to
 * `remote_path` (`str` | required): parent path in which to upload sequencing run directories in the specified bucket
 * `sample_regex` (`str` | optional): regex pattern to match against all samples parsed from the samplesheet, all samples must match this pattern to upload the run. This is to be used for controlling upload of specific runs where samplenames inform the assay / test.
-* `exclude_patterns` (`list` | optional): list of directory / filename regex patterns of which to exclude from uploading (e.g. [".*png"] would exclude the PNGs from Thumbnail_Images/ from being uploaded)
+* `exclude_patterns` (`list` | optional): list of directory / filename regex patterns of which to exclude from uploading (e.g. `[".*png"]` would exclude the PNGs from `Thumbnail_Images/` from being uploaded)
 
 Each dictionary inside of the list to monitor allows for setting separate upload locations for each of the monitored directories. For example, in the below codeblock the output of both `sequencer_1` and `sequencer_2` would be uploaded to the root of `bucket_A`, and the output of `sequencer_3` would be uploaded into `sequencer_3_runs` in `bucket_B`. Any number of these dictionaries may be defined in the monitor list.
 
@@ -88,14 +88,14 @@ Each dictionary inside of the list to monitor allows for setting separate upload
 *Example `monitor` config section defining two sets of monitored directories and upload locations*
 
 
-## AWS Authentication
+## :closed_lock_with_key: AWS Authentication
 
 Authentication with AWS may be performed either via SSO / IAM or with specified access keys. If using SSO / IAM, it must first be configured using the [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html#sso-configure-profile-token-auto-sso), and then the profile being used set to the environment variable `AWS_DEFAULT_PROFILE`. If this is specified the uploader will attempt to authenticate using this profile which must have permission to access the specified S3 bucket. If using access keys, both the environment variables `AWS_ACCESS_KEY` and `AWS_SECRET_KEY` must be set, and these will be used for authentication. If running via the provided Docker image these may be set using `--env` or `--env-file`.
 
 Only one authentication method may be used, if both `AWS_DEFAULT_PROFILE` and `AWS_ACCESS_KEY` / `AWS_SECRET_KEY` are provided the uploader will exit and one method must be unset to continue.
 
 
-## Logging
+## :wood: Logging
 
 All logs by default are written to `/var/log/s3_upload`. Logs from stdout and stderr are written to the file `s3_upload.log`, and are on a rotating time handle at midnight and backups stored in the same directory for 5 days.
 
@@ -116,7 +116,7 @@ The expected fields in this log file are:
 * `uploaded_files` (`dict`) - mapping of filename to ETag ID of successfully uploaded files
 
 
-## Benchmarks
+## :dash: Benchmarks
 A small [benchmarking script](https://github.com/eastgenomics/s3_upload/blob/main/scripts/benchmark.py) has been written to be able to repeatedly call the uploader with a set number of cores and threads at once to determine the optimal setting for upload time and available compute. It will iterate through combinations of the provided cores and threads, uploading a given run directory and automatically deleting the uploaded files on completion. Results are then written to a file `s3_upload_benchmark_{datetime}.tsv` in the current directory. This allows for measuring the total upload time and maximum resident set size (i.e. peak memory usage). This is using the [memory-profiler](https://pypi.org/project/memory-profiler/) package to measure combined memory usage of all spawned child processes to run the upload.
 
 The below benchmarks were output from running the script with the following arguments: `python3 scripts/benchmark.py --local_path /genetics/A01295b/241023_A01295_0432_BHK3NFDRX5 --cores 1 2 3 4 --threads 1 2 4 8 --bucket s3-upload-benchmarking`.
@@ -130,7 +130,8 @@ These benchmarks were obtained from uploading a NovaSeq S1 flowcell sequencing r
 | 4     | 4       | 0:9:23               | 85.69                          |
 | 4     | 8       | 0:9:20               | 96.0                           |
 
-## Docker
+## <img src="images/moby.png" width="24"/> Docker
+
 A Dockerfile is provided for running the upload from within a Docker container. For convenience, the tool is aliased to the command `s3_upload` in the container.
 
 To build the Docker image: `docker build -t s3_upload:<tag> .`.
@@ -159,19 +160,26 @@ optional arguments:
 > Both the `--local_path` for single run upload, and `monitored_directories` paths for monitoring, must be relative to where they are mounted into the container (i.e. if you mount the sequencer output to `/sequencer_output/` then your paths would be `--local_path /sequencer_output/run_A/` and `/sequencer_output/` for single upload and monitoring, respectively). In addition, for monitoring you must ensure to mount the log directory outside of the container to be persistent (i.e. using the default log location: `--volume /local/log/dir:/var/log/s3_upload`. If this is not done when the container shuts down, all runs will be identified as new on the next upload run and will attempt to be uploaded.)
 
 
-## Tests
+## <img src="images/slack.png" width="18"/> Slack
+
+Currently, notifications are able to be sent via the use of Slack webhooks. These include log notifications for when run(s) complete uploading, as well as alerts for if upload(s) fail, or if authentication to AWS fails. Use of Slack notifications is optional, and all alerts will still go to the log file by default if not configured.
+
+To enable Slack notifications, one or both of the keys `slack_log_webhook` and `slack_alert_webhook` should be added to the config file. If both are defined, notifications of complete uploads will be sent to `slack_log_webhook` and any errors / failures will be sent to `slack_alert_webhook`. If only one is defined, all notifications will be sent to that single endpoint.
+
+
+## :hammer_and_wrench: Tests
 
 Comprehensive unit tests have been written in [tests/unit](https://github.com/eastgenomics/s3_upload/tree/main/tests/unit) for all the core functionality of the uploader. These are configured to run with PyTest on every change with [GitHub actions](https://github.com/eastgenomics/s3_upload/blob/main/.github/workflows/pytest.yml).
 
 Several [end to end test scenarios](https://github.com/eastgenomics/s3_upload/tree/main/tests/e2e) have also been written to provide robust and automated end to end testing. These are currently not configured to run via GitHub actions due to requiring authentication with AWS. Details on running the tests may be found in the [e2e test readme](https://github.com/eastgenomics/s3_upload/blob/main/tests/e2e/README.md). These should be run locally when changes are made and updated accordingly.
 
 
-## Notes
+## :pen: Notes
 * When running in monitor mode, a file lock is acquired on `s3_upload.lock`, which by default will be written into the log directory. This ensures only a single upload process may run at once, preventing duplicate concurrent uploads of the same files.
 
 
-## Pre-commit Hooks
-For development pre-commit hooks are setup to enable secret scanning using [Yelp/detect-secrets](https://github.com/Yelp/detect-secrets?tab=readme-ov-file), this will attempt to prevent accidentally committing anything that may be sensitive (i.e. AWS credentials).
+## :hook: Pre-commit Hooks
+For development, pre-commit hooks are setup to enable secret scanning using [Yelp/detect-secrets](https://github.com/Yelp/detect-secrets?tab=readme-ov-file), this will attempt to prevent accidentally committing anything that may be sensitive (i.e. AWS credentials).
 
 This requires first installing [pre-commit](https://pre-commit.com/) and [detect-secrets](https://github.com/Yelp/detect-secrets?tab=readme-ov-file#installation), both may be installed with pip:
 ```

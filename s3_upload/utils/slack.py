@@ -1,3 +1,5 @@
+"""Functions for posting Slack notifications"""
+
 import json
 import requests
 
@@ -26,7 +28,7 @@ def format_message(completed=None, failed=None) -> str:
     message = ""
 
     if completed:
-        message += ":white_check_mark: S3 Upload: Successfully uploaded "
+        message += ":white_check_mark:  *S3 Upload*: Successfully uploaded "
         message += f"{len(completed)} runs\n\t:black_square: "
         message += "\n\t:black_square: ".join(completed)
 
@@ -35,7 +37,7 @@ def format_message(completed=None, failed=None) -> str:
             message += "\n\n"
 
         message += (
-            ":x: S3 Upload: Failed uploading"
+            ":x:  *S3 Upload*: Failed uploading"
             f" {len(failed)} runs\n\t:black_square: "
         )
         message += "\n\t:black_square: ".join(failed)
