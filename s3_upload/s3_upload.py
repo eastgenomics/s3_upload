@@ -195,6 +195,10 @@ def monitor_directories_for_upload(config, dry_run):
         "slack_log_webhook"
     )
 
+    if not slack_alert_webhook:
+        # try get from env if not set, mostly for testing
+        slack_alert_webhook = environ.get("SLACK_ALERT_WEBHOOK")
+
     if not log_url and not alert_url:
         log.warning(
             "Neither `slack_log_webhook` or `slack_alert_webhook` specified =>"

@@ -16,6 +16,7 @@ from botocore.config import Config
 from botocore import exceptions as s3_exceptions
 
 from .log import get_logger
+from .slack import post_message as post_slack_message
 
 AWS_DEFAULT_PROFILE = environ.get("AWS_DEFAULT_PROFILE")
 AWS_SECRET_KEY = environ.get("AWS_SECRET_KEY")
@@ -24,10 +25,13 @@ AWS_ACCESS_KEY = environ.get("AWS_ACCESS_KEY")
 log = get_logger("s3_upload")
 
 
-def check_aws_access():
+def check_aws_access(slack_alert_webhook=None):
     """
     Check authentication with AWS S3 with stored credentials by checking
     access to all buckets
+
+    slack_alert_webhook : str
+        webhook url for sending alerts to
 
     Returns
     -------
@@ -45,13 +49,16 @@ def check_aws_access():
     """
     log.info("Checking access to AWS")
 
+    error_message = None
+    slack_base_error = (
+        ":warning:  *S3 Upload*: Error in connecting to AWS!\n\n"
+    )
+
     if AWS_DEFAULT_PROFILE and (AWS_ACCESS_KEY or AWS_SECRET_KEY):
-        log.error(
-            "Both AWS_DEFAULT_PROFILE provided as well as AWS_ACCESS_KEY and /"
-            " or AWS_SECRET_KEY. Only one authentication method may be used."
-        )
-        sys.exit(
-            "Invalid environment variables for authentication method specified"
+        error_message = (
+            "Both `AWS_DEFAULT_PROFILE` provided as well as `AWS_ACCESS_KEY`"
+            " and / or `AWS_SECRET_KEY`. Only one authentication method may be"
+            " used."
         )
 
     if AWS_DEFAULT_PROFILE:
@@ -65,10 +72,20 @@ def check_aws_access():
             " will be used for authentication"
         )
     else:
-        log.error(
-            "Required environment variables for AWS authentication not defined"
+        error_message = (
+            "Required environment variables for AWS authentication not"
+            " defined. Requires either `AWS_DEFAULT_PROFILE` or"
+            " `AWS_ACCESS_KEY` and `AWS_SECRET_KEY`."
         )
-        sys.exit("AWS authentication credentials not provided")
+
+    if error_message:
+        if slack_alert_webhook:
+            post_slack_message(
+                url=slack_alert_webhook,
+                message=slack_base_error + error_message,
+            )
+        log.error(error_message)
+        sys.exit(error_message)
 
     try:
         return list(
@@ -80,7 +97,13 @@ def check_aws_access():
             .resource("s3")
             .buckets.all()
         )
-    except s3_exceptions.ClientError as err:
+    except Exception as err:
+        if slack_alert_webhook:
+            post_slack_message(
+                url=slack_alert_webhook,
+                message=f"{slack_base_error}\t\t{err}",
+            )
+
         raise RuntimeError(f"Error in connecting to AWS: {err}") from err
 
 
