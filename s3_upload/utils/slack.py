@@ -27,7 +27,7 @@ def format_message(completed=None, failed=None) -> str:
 
     if completed:
         message += ":white_check_mark:  *S3 Upload*: Successfully uploaded "
-        message += f"{len(completed)} runs\n\t\t:black_square: "
+        message += f"{len(completed)} runs\n\t:black_square: "
         message += "\n\t:black_square: ".join(completed)
 
     if failed:
@@ -36,7 +36,7 @@ def format_message(completed=None, failed=None) -> str:
 
         message += (
             ":x:  *S3 Upload*: Failed uploading"
-            f" {len(failed)} runs\n\t\t:black_square: "
+            f" {len(failed)} runs\n\t:black_square: "
         )
         message += "\n\t:black_square: ".join(failed)
 
