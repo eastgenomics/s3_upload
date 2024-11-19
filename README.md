@@ -119,18 +119,26 @@ The expected fields in this log file are:
 ## :dash: Benchmarks
 A small [benchmarking script](https://github.com/eastgenomics/s3_upload/blob/main/scripts/benchmark.py) has been written to be able to repeatedly call the uploader with a set number of cores and threads at once to determine the optimal setting for upload time and available compute. It will iterate through combinations of the provided cores and threads, uploading a given run directory and automatically deleting the uploaded files on completion. Results are then written to a file `s3_upload_benchmark_{datetime}.tsv` in the current directory. This allows for measuring the total upload time and maximum resident set size (i.e. peak memory usage). This is using the [memory-profiler](https://pypi.org/project/memory-profiler/) package to measure combined memory usage of all spawned child processes to run the upload.
 
-The below benchmarks were output from running the script with the following arguments: `python3 scripts/benchmark.py --local_path /genetics/A01295b/241023_A01295_0432_BHK3NFDRX5 --cores 1 2 3 4 --threads 1 2 4 8 --bucket s3-upload-benchmarking`.
+The below benchmarks were output from running the script with the following arguments: `python3 scripts/benchmark.py --local_path /genetics/A01295b/241023_A01295_0432_BHK3NFDRX5 --cores 1 2 4 --threads 1 2 4 8 --bucket s3-upload-benchmarking`.
 
 These benchmarks were obtained from uploading a NovaSeq S1 flowcell sequencing run compromising of 102GB of data in 5492 files. Uploading was done on a virtual server with a 4 core Intel(R) Xeon(R) Gold 6348 CPU @ 2.60GHz vCPU, 16GB RAM and 10Gbit/s network bandwidth. Uploading will be highly dependent on network bandwidth availability, local storage speed, available compute resources etc. Upload time *should* scale approximately linearly with the total files / size of run. YMMV.
 
 | cores | threads | elapsed time (h:m:s) | maximum resident set size (mb) |
 |-------|---------|----------------------|--------------------------------|
-| 4     | 1       | 0:19:02              | 77.70                          |
-| 4     | 2       | 0:11:19              | 80.71                          |
-| 4     | 4       | 0:9:23               | 85.69                          |
-| 4     | 8       | 0:9:20               | 96.0                           |
+| 1     | 1       | 01:14:42             | 137.08                         |
+| 1     | 2       | 00:25:57             | 138.89                         |
+| 1     | 4       | 00:14:38             | 146.5                          |
+| 1     | 8       | 00:11:38             | 160.22                         |
+| 2     | 1       | 00:31:22             | 207.22                         |
+| 2     | 2       | 00:18:14             | 216.47                         |
+| 2     | 4       | 00:10:34             | 227.69                         |
+| 2     | 8       | 00:08:10             | 256.01                         |
+| 4     | 1       | 00:17:21             | 362.93                         |
+| 4     | 2       | 00:10:41             | 380.59                         |
+| 4     | 4       | 00:08:20             | 405.37                         |
+| 4     | 8       | 00:07:49             | 453.69                         |
 
-## <img src="images/moby.png" width="24"/> Docker
+## <img src="images/moby.png" width="34"/> Docker
 
 A Dockerfile is provided for running the upload from within a Docker container. For convenience, the tool is aliased to the command `s3_upload` in the container.
 
@@ -160,7 +168,7 @@ optional arguments:
 > Both the `--local_path` for single run upload, and `monitored_directories` paths for monitoring, must be relative to where they are mounted into the container (i.e. if you mount the sequencer output to `/sequencer_output/` then your paths would be `--local_path /sequencer_output/run_A/` and `/sequencer_output/` for single upload and monitoring, respectively). In addition, for monitoring you must ensure to mount the log directory outside of the container to be persistent (i.e. using the default log location: `--volume /local/log/dir:/var/log/s3_upload`. If this is not done when the container shuts down, all runs will be identified as new on the next upload run and will attempt to be uploaded.)
 
 
-## <img src="images/slack.png" width="18"/> Slack
+## <img src="images/slack.png" width="22"/> Slack
 
 Currently, notifications are able to be sent via the use of Slack webhooks. These include log notifications for when run(s) complete uploading, as well as alerts for if upload(s) fail, or if authentication to AWS fails. Use of Slack notifications is optional, and all alerts will still go to the log file by default if not configured.
 
