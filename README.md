@@ -138,7 +138,7 @@ These benchmarks were obtained from uploading a NovaSeq S1 flowcell sequencing r
 | 4     | 4       | 00:08:20             | 405.37                         |
 | 4     | 8       | 00:07:49             | 453.69                         |
 
-## <img src="images/moby.png" width="34" style="max-width: 100%; position:relative; top: 6px"/> Docker
+## <img src="images/moby.png" width="34"/> Docker
 
 A Dockerfile is provided for running the upload from within a Docker container. For convenience, the tool is aliased to the command `s3_upload` in the container.
 
@@ -168,7 +168,7 @@ optional arguments:
 > Both the `--local_path` for single run upload, and `monitored_directories` paths for monitoring, must be relative to where they are mounted into the container (i.e. if you mount the sequencer output to `/sequencer_output/` then your paths would be `--local_path /sequencer_output/run_A/` and `/sequencer_output/` for single upload and monitoring, respectively). In addition, for monitoring you must ensure to mount the log directory outside of the container to be persistent (i.e. using the default log location: `--volume /local/log/dir:/var/log/s3_upload`. If this is not done when the container shuts down, all runs will be identified as new on the next upload run and will attempt to be uploaded.)
 
 
-## <img src="images/slack.png" width="26" style="max-width: 100%; position:relative; top: 4px"/> Slack
+## <img src="images/slack.png" width="22"/> Slack
 
 Currently, notifications are able to be sent via the use of Slack webhooks. These include log notifications for when run(s) complete uploading, as well as alerts for if upload(s) fail, or if authentication to AWS fails. Use of Slack notifications is optional, and all alerts will still go to the log file by default if not configured.
 
