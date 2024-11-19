@@ -138,7 +138,7 @@ These benchmarks were obtained from uploading a NovaSeq S1 flowcell sequencing r
 | 4     | 4       | 00:08:20             | 405.37                         |
 | 4     | 8       | 00:07:49             | 453.69                         |
 
-## <img src="images/moby.png" width="24"/> Docker
+## <img src="images/moby.png" width="34" style="max-width: 100%; position:relative; top: 6px">/> Docker
 
 A Dockerfile is provided for running the upload from within a Docker container. For convenience, the tool is aliased to the command `s3_upload` in the container.
 
