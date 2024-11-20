@@ -386,13 +386,10 @@ def main() -> None:
         upload_single_run(args)
     else:
         config = read_config(config=args.config)
-
-        log_dir = config.get("log_dir", "/var/log/s3_upload")
-
-        lock_fd = acquire_lock(lock_file=path.join(log_dir, "s3_upload.lock"))
-
         verify_config(config=config)
 
+        log_dir = config.get("log_dir", "/var/log/s3_upload")
+        lock_fd = acquire_lock(lock_file=path.join(log_dir, "s3_upload.lock"))
         set_file_handler(log, log_dir=log_dir)
 
         monitor_directories_for_upload(config=config, dry_run=args.dry_run)
