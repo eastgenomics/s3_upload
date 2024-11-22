@@ -378,18 +378,17 @@ class TestGetRunsToUpload(unittest.TestCase):
             self.assertTrue(to_upload == [] and partial_upload == {})
 
         with self.subTest("testing log message"):
-            pass
-        with self.assertLogs("s3_upload", level="DEBUG") as log:
-            utils.get_runs_to_upload(
-                monitor_dirs=[sequencer_output_dir], max_age=96
-            )
+            with self.assertLogs("s3_upload", level="DEBUG") as log:
+                utils.get_runs_to_upload(
+                    monitor_dirs=[sequencer_output_dir], max_age=96
+                )
 
-            expected_log_message = (
-                f"{old_run} older than maximum age (96 h) to monitor "
-                "for upload and will not be uploaded"
-            )
+                expected_log_message = (
+                    f"{old_run} older than maximum age (96 h) to monitor "
+                    "for upload and will not be uploaded"
+                )
 
-            self.assertIn(expected_log_message, "".join(log.output))
+                self.assertIn(expected_log_message, "".join(log.output))
 
         rmtree(sequencer_output_dir)
 
