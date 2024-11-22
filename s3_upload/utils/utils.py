@@ -251,15 +251,6 @@ def get_runs_to_upload(
                 )
                 continue
 
-            if not check_run_age_within_limit(sub_dir):
-                log.debug(
-                    "%s older than maximum age (%s h) to monitor for upload "
-                    "and will not be uploaded",
-                    sub_dir,
-                    max_age,
-                )
-                continue
-
             samplesheet_contents = read_samplesheet_from_run_directory(sub_dir)
 
             if not samplesheet_contents:
@@ -295,6 +286,16 @@ def get_runs_to_upload(
                 )
                 partially_uploaded[sub_dir] = uploaded_files
             else:
+                # only try upload a newly picked up run if it's within age limit
+                if not check_run_age_within_limit(sub_dir):
+                    log.debug(
+                        "%s older than maximum age (%s h) to monitor for"
+                        " upload and will not be uploaded",
+                        sub_dir,
+                        max_age,
+                    )
+                    continue
+
                 log.info(
                     "%s has not started uploading, to be uploaded", sub_dir
                 )
