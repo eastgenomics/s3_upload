@@ -1,5 +1,6 @@
 """General utility functions"""
 
+from datetime import datetime, timedelta
 from glob import glob
 from itertools import zip_longest
 from os import path, scandir, stat
@@ -65,6 +66,39 @@ def check_is_sequencing_run_dir(run_dir) -> bool:
     """
     log.debug("Checking if directory is a sequencing run: %s", run_dir)
     return path.exists(path.join(run_dir, "RunInfo.xml"))
+
+
+def check_run_age_within_limit(run_dir, max_age=72) -> bool:
+    """
+    Check if the run age is within the max_age limit to consider for upload.
+
+    Run age is determined from the mtime of the RunInfo.xml file in the
+    given run directory. Since unix has no created time stored for a file
+    we use the last modified time, which for a regular sequencing output
+    is when it was created. This has the side effect that an older run may
+    be triggered for upload by touching this file.
+
+    Parameters
+    ----------
+    run_dir : str
+        path to directory to check
+    max_age : int
+        maximum age in hours to monitor a run directory for uploading
+
+    Returns
+    -------
+    bool
+        True if modified time of RunInfo.xml is within allowed max_age
+    """
+    now = datetime.now()
+    modified_time = datetime.fromtimestamp(
+        path.getmtime(path.join(run_dir, "RunInfo.xml"))
+    )
+
+    if modified_time > now - timedelta(hours=int(max_age)):
+        return True
+    else:
+        return False
 
 
 def check_upload_state(
@@ -155,7 +189,10 @@ def check_all_uploadable_samples(
 
 
 def get_runs_to_upload(
-    monitor_dirs, log_dir="/var/log/s3_upload", sample_pattern=None
+    monitor_dirs,
+    log_dir="/var/log/s3_upload",
+    sample_pattern=None,
+    max_age=None,
 ) -> Tuple[list, dict]:
     """
     Get completed sequencing runs to upload from specified directories
@@ -170,6 +207,8 @@ def get_runs_to_upload(
     sample_pattern : str
         optional regex pattern that all samples from samplesheet must
         match to be uploadable
+    max_age : int
+        maximum age in hours to monitor a run directory for uploading
 
     Returns
     -------
@@ -208,6 +247,14 @@ def get_runs_to_upload(
             if not check_termination_file_exists(sub_dir):
                 log.debug(
                     "%s has not completed sequencing and will not be uploaded",
+                    sub_dir,
+                )
+                continue
+
+            if not check_run_age_within_limit(sub_dir):
+                log.debug(
+                    "%s older than maximum age to monitor for upload and will"
+                    " not be uploaded",
                     sub_dir,
                 )
                 continue
