@@ -94,6 +94,37 @@ class TestCheckIsSequencingRunDir(unittest.TestCase):
         os.remove(run_info_xml)
 
 
+class TestCheckRunAgeWithinLimit(unittest.TestCase):
+    def setUp(self):
+        self.test_run_dir = os.path.join(TEST_DATA_DIR, "test_run")
+        os.makedirs(
+            self.test_run_dir,
+            exist_ok=True,
+        )
+
+        open(os.path.join(self.test_run_dir, "RunInfo.xml"), mode="a").close()
+
+    def tearDown(self):
+        rmtree(self.test_run_dir)
+
+    def test_run_newer_than_specified_max_age_returns_true(self):
+        self.assertTrue(
+            utils.check_run_age_within_limit(self.test_run_dir, max_age=24)
+        )
+
+    def test_run_older_than_max_age_returns_false(self):
+        # update the modified time of RunInfo.xml to be older than the
+        # given max age (1621091308 => 16:08:28 - 15/5/2021)
+        os.utime(
+            path=os.path.join(self.test_run_dir, 'RunInfo.xml'),
+            times=(1621091308, 1621091308)
+        )
+
+        self.assertFalse(
+            utils.check_run_age_within_limit(self.test_run_dir, max_age=24)
+        )
+
+
 @patch("s3_upload.utils.utils.path.exists")
 @patch("s3_upload.utils.utils.read_upload_state_log")
 class TestCheckUploadState(unittest.TestCase):
