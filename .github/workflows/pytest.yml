@@ -20,8 +20,12 @@ jobs:
       run: |
         sudo mkdir /var/log/s3_upload
         sudo chmod o+w /var/log/s3_upload
-        pytest -v --cov --cov-report xml --count 10 --random-order tests/unit/
+        pytest -v --cov --count 10 --random-order tests/unit/
+    - name: Get test coverage %
+        run: |
+        pytest -v --cov --cov-report xml tests/unit/
         total=$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")')
+        export $total
         echo $total
     - name: "Make badge"
       uses: schneegans/dynamic-badges-action@v1.4.0
