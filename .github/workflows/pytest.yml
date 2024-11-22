@@ -20,4 +20,18 @@ jobs:
       run: |
         sudo mkdir /var/log/s3_upload
         sudo chmod o+w /var/log/s3_upload
-        pytest -v --cov --count 10 --random-order tests/unit/
+        pytest -v --cov --cov-report xml --count 10 --random-order tests/unit/
+        total=$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")')
+        echo $total
+    - name: "Make badge"
+      uses: schneegans/dynamic-badges-action@v1.4.0
+      with:
+        # GIST_TOKEN is a GitHub personal access token with scope "gist".
+        auth: ${{ secrets.GIST_TOKEN }}
+        gistID: ${{ secrets.GIST_ID }}   # replace with your real Gist id.
+        filename: covbadge.json
+        label: Coverage
+        message: ${{ env.total }}%
+        minColorRange: 50
+        maxColorRange: 90
+        valColorRange: ${{ env.total }}
