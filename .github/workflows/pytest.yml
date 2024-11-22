@@ -22,7 +22,7 @@ jobs:
         sudo chmod o+w /var/log/s3_upload
         pytest -v --cov --count 10 --random-order tests/unit/
     - name: Get test coverage %
-        run: |
+      run: |
         pytest -v --cov --cov-report xml tests/unit/
         total=$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")')
         export $total
