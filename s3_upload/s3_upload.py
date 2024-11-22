@@ -221,6 +221,7 @@ def monitor_directories_for_upload(config, dry_run):
             monitor_dir_config.get("monitored_directories"),
             log_dir=log_dir,
             sample_pattern=monitor_dir_config.get("sample_regex"),
+            max_age=config.get("max_age", 72),
         )
 
         for run_dir in completed_runs:
