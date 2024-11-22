@@ -391,6 +391,13 @@ def main() -> None:
 
         log_dir = config.get("log_dir", "/var/log/s3_upload")
         lock_fd = acquire_lock(lock_file=path.join(log_dir, "s3_upload.lock"))
+
+        if config.get("log_level"):
+            log.setLevel(config.get("log_level"))
+
+        log.info("this is main info")
+        log.debug("this is main debug")
+
         set_file_handler(log, log_dir=log_dir)
 
         monitor_directories_for_upload(config=config, dry_run=args.dry_run)
