@@ -469,8 +469,22 @@ def verify_config(config) -> None:
     if not isinstance(config.get("max_threads", 0), int):
         errors.append("max_threads must be an integer")
 
-    if not config.get("log_dir"):
-        errors.append("required parameter log_dir not defined")
+    if config.get("log_level"):
+        level = config.get("log_level")
+        valid_str_levels = [
+            "NOTSET",
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL",
+        ]
+        valid_int_levels = [0, 10, 20, 30, 40, 50]
+
+        if (
+            isinstance(level, str) and level.upper() not in valid_str_levels
+        ) or (isinstance(level, int) and level not in valid_int_levels):
+            errors.append(f"Given log level is not valid: {level}")
 
     if not config.get("monitor"):
         errors.append("required parameter monitor not defined")
