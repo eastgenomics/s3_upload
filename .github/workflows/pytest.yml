@@ -23,8 +23,8 @@ jobs:
         pytest -v --cov --count 10 --random-order tests/unit/
     - name: Get test coverage %
       run: |
-        pytest -v --cov --cov-report xml tests/unit/
-        export TOTAL=$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")')
+        pytest --cov --cov-report xml tests/unit/
+        export TOTAL=$(echo "$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")') * 100" | bc -l)
         echo "total=$TOTAL" >> $GITHUB_ENV
         echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
     - name: "Make badge"
