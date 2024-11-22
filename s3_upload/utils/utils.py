@@ -469,6 +469,9 @@ def verify_config(config) -> None:
     if not isinstance(config.get("max_threads", 0), int):
         errors.append("max_threads must be an integer")
 
+    if not isinstance(config.get("max_age", 0), int):
+        errors.append("max_age must be an integer")
+
     if config.get("log_level"):
         level = config.get("log_level")
         valid_str_levels = [

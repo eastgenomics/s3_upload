@@ -921,6 +921,7 @@ class TestVerifyConfig(unittest.TestCase):
         valid_config = {
             "max_cores": 4,
             "max_threads": 8,
+            "max_age": 96,
             "log_level": "DEBUG",
             "log_dir": "/var/log/s3_upload",
             "monitor": [
@@ -948,6 +949,7 @@ class TestVerifyConfig(unittest.TestCase):
         invalid_config = {
             "max_cores": "4",
             "max_threads": "8",
+            "max_age": "96",
             "log_level": "BLARG",
             "monitor": [
                 {
@@ -965,14 +967,14 @@ class TestVerifyConfig(unittest.TestCase):
         }
 
         expected_errors = (
-            "7 errors found in config:\n\tmax_cores must be an"
-            " integer\n\tmax_threads must be an integer\n\tGiven log level is"
-            " not valid: BLARG\n\trequired parameter monitored_directories"
-            " missing from monitor section 0\n\trequired parameter remote_path"
-            " missing from monitor section 0\n\tbucket not of expected type"
-            " from monitor section 1. Expected: <class 'str'> | Found <class"
-            " 'int'>\n\tInvalid regex pattern provided in monitor section 1:"
-            " [assay_1"
+            "8 errors found in config:\n\tmax_cores must be an"
+            " integer\n\tmax_threads must be an integer\n\tmax_age must be an"
+            " integer\n\tGiven log level is not valid: BLARG\n\trequired"
+            " parameter monitored_directories missing from monitor section"
+            " 0\n\trequired parameter remote_path missing from monitor section"
+            " 0\n\tbucket not of expected type from monitor section 1."
+            " Expected: <class 'str'> | Found <class 'int'>\n\tInvalid regex"
+            " pattern provided in monitor section 1: [assay_1"
         )
 
         with pytest.raises(RuntimeError, match=re.escape(expected_errors)):
