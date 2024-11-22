@@ -24,7 +24,7 @@ jobs:
     - name: Get test coverage %
       run: |
         pytest --cov --cov-report xml tests/unit/
-        export TOTAL=$(printf %.2f "$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")') * 100" | bc -l)
+        export TOTAL=$(printf %.2f $(echo "$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")') * 100" | bc -l))
         echo "total=$TOTAL" >> $GITHUB_ENV
         echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
     - name: "Make badge"
