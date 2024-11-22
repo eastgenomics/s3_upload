@@ -116,8 +116,8 @@ class TestCheckRunAgeWithinLimit(unittest.TestCase):
         # update the modified time of RunInfo.xml to be older than the
         # given max age (1621091308 => 16:08:28 - 15/5/2021)
         os.utime(
-            path=os.path.join(self.test_run_dir, 'RunInfo.xml'),
-            times=(1621091308, 1621091308)
+            path=os.path.join(self.test_run_dir, "RunInfo.xml"),
+            times=(1621091308, 1621091308),
         )
 
         self.assertFalse(
@@ -343,6 +343,49 @@ class TestGetRunsToUpload(unittest.TestCase):
                 )
 
                 self.assertTrue(expected_log_message in "".join(log.output))
+
+        rmtree(sequencer_output_dir)
+
+    def test_runs_over_max_age_skipped(self):
+        """
+        Runs to not monitor are determined from the max_age value stored
+        in the config, and mtime of the RunInfo.xml file
+        """
+        sequencer_output_dir = os.path.join(TEST_DATA_DIR, uuid4().hex)
+        old_run = os.path.join(
+            sequencer_output_dir, "16102023_A01295_001_ABC123"
+        )
+        os.makedirs(old_run, exist_ok=True)
+        open(os.path.join(old_run, "RunInfo.xml"), "w").close()
+        open(os.path.join(old_run, "CopyComplete.txt"), "w").close()
+
+        # update the modified time of RunInfo.xml to be older than the
+        # given max age (1621091308 => 16:08:28 - 15/5/2021)
+        os.utime(
+            path=os.path.join(old_run, "RunInfo.xml"),
+            times=(1621091308, 1621091308),
+        )
+
+        to_upload, partial_upload = utils.get_runs_to_upload(
+            monitor_dirs=[sequencer_output_dir], max_age=96
+        )
+
+        with self.subTest("testing outputs are empty"):
+            self.assertTrue(to_upload == [] and partial_upload == {})
+
+        with self.subTest("testing log message"):
+            pass
+        with self.assertLogs("s3_upload", level="DEBUG") as log:
+            utils.get_runs_to_upload(
+                monitor_dirs=[sequencer_output_dir], max_age=96
+            )
+
+            expected_log_message = (
+                f"{old_run} older than maximum age (96 h) to monitor "
+                "for upload and will not be uploaded"
+            )
+
+            self.assertIn(expected_log_message, "".join(log.output))
 
         rmtree(sequencer_output_dir)
 

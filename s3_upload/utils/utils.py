@@ -192,7 +192,7 @@ def get_runs_to_upload(
     monitor_dirs,
     log_dir="/var/log/s3_upload",
     sample_pattern=None,
-    max_age=None,
+    max_age=72,
 ) -> Tuple[list, dict]:
     """
     Get completed sequencing runs to upload from specified directories
@@ -253,9 +253,10 @@ def get_runs_to_upload(
 
             if not check_run_age_within_limit(sub_dir):
                 log.debug(
-                    "%s older than maximum age to monitor for upload and will"
-                    " not be uploaded",
+                    "%s older than maximum age (%s h) to monitor for upload "
+                    "and will not be uploaded",
                     sub_dir,
+                    max_age,
                 )
                 continue
 
