@@ -24,9 +24,9 @@ jobs:
     - name: Get test coverage %
       run: |
         pytest -v --cov --cov-report xml tests/unit/
-        total=$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")')
-        export $total
-        echo $total
+        export TOTAL=$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")')
+        echo "total=$TOTAL" >> $GITHUB_ENV
+        echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
     - name: "Make badge"
       uses: schneegans/dynamic-badges-action@v1.4.0
       with:
