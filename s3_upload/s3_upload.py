@@ -395,9 +395,6 @@ def main() -> None:
         if config.get("log_level"):
             log.setLevel(config.get("log_level"))
 
-        log.info("this is main info")
-        log.debug("this is main debug")
-
         set_file_handler(log, log_dir=log_dir)
 
         monitor_directories_for_upload(config=config, dry_run=args.dry_run)
