@@ -1,6 +1,6 @@
 import os
 import re
-from shutil import rmtree
+from shutil import copyfile, rmtree
 from uuid import uuid4
 import unittest
 from unittest.mock import patch
@@ -358,6 +358,10 @@ class TestGetRunsToUpload(unittest.TestCase):
         os.makedirs(old_run, exist_ok=True)
         open(os.path.join(old_run, "RunInfo.xml"), "w").close()
         open(os.path.join(old_run, "CopyComplete.txt"), "w").close()
+        copyfile(
+            os.path.join(TEST_DATA_DIR, "example_samplesheet.csv"),
+            os.path.join(old_run, "samplesheet.csv"),
+        )
 
         # update the modified time of RunInfo.xml to be older than the
         # given max age (1621091308 => 16:08:28 - 15/5/2021)
