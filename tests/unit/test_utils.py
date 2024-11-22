@@ -921,7 +921,7 @@ class TestVerifyConfig(unittest.TestCase):
         valid_config = {
             "max_cores": 4,
             "max_threads": 8,
-            "log_level": "INFO",
+            "log_level": "DEBUG",
             "log_dir": "/var/log/s3_upload",
             "monitor": [
                 {
@@ -948,7 +948,7 @@ class TestVerifyConfig(unittest.TestCase):
         invalid_config = {
             "max_cores": "4",
             "max_threads": "8",
-            "log_level": "INFO",
+            "log_level": "BLARG",
             "monitor": [
                 {
                     "bucket": "bucket_A",
@@ -966,8 +966,8 @@ class TestVerifyConfig(unittest.TestCase):
 
         expected_errors = (
             "7 errors found in config:\n\tmax_cores must be an"
-            " integer\n\tmax_threads must be an integer\n\trequired parameter"
-            " log_dir not defined\n\trequired parameter monitored_directories"
+            " integer\n\tmax_threads must be an integer\n\tGiven log level is"
+            " not valid: BLARG\n\trequired parameter monitored_directories"
             " missing from monitor section 0\n\trequired parameter remote_path"
             " missing from monitor section 0\n\tbucket not of expected type"
             " from monitor section 1. Expected: <class 'str'> | Found <class"
