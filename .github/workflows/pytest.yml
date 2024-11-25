@@ -24,12 +24,13 @@ jobs:
     - name: Get test coverage %
       run: |
         pytest --cov --cov-report xml tests/unit/
-        export TOTAL=$(printf %.2f $(echo "$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")') * 100" | bc -l))
-        echo "total=$TOTAL" >> $GITHUB_ENV
+        coverage_raw=$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")')
+        TOTAL=$(printf "%.2f" "$(echo "${coverage_raw} * 100" | bc -l)")
+        echo "total=${TOTAL}" >> $GITHUB_ENV
         echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
     - name: Make coverage badge
       uses: schneegans/dynamic-badges-action@v1.4.0
-      if: github.ref == 'refs/heads/main'  # only update badge when we push to main
+      # if: github.ref == 'refs/heads/main'  # only update badge when we push to main
       with:
         # Required secrets:
         # - GIST_TOKEN: Create a GitHub PAT with 'gist' scope at https://github.com/settings/tokens
