@@ -450,8 +450,6 @@ class TestGetRunsToUpload(unittest.TestCase):
         that the error is logged and continues
         """
         mock_read.return_value = None
-        # mock_uploadable.return_value = True
-        # mock_state.return_value = ("uploaded", [])
 
         sequencer_output_dir = os.path.join(TEST_DATA_DIR, uuid4().hex)
         complete_run = os.path.join(
@@ -474,6 +472,47 @@ class TestGetRunsToUpload(unittest.TestCase):
                 )
 
                 self.assertIn(expected_log_message, "".join(log.output))
+
+        rmtree(sequencer_output_dir)
+
+    def test_runs_with_not_all_samples_matching_sample_pattern_skipped(self):
+        """
+        Test when the samples in the samplesheet don't match the given
+        regex pattern that will come from the config that the run is
+        skipped
+        """
+        sequencer_output_dir = os.path.join(TEST_DATA_DIR, uuid4().hex)
+        complete_run = os.path.join(
+            sequencer_output_dir, "16102023_A01295_001_ABC123"
+        )
+        os.makedirs(
+            complete_run,
+            exist_ok=True,
+        )
+        open(os.path.join(complete_run, "RunInfo.xml"), "w").close()
+        open(os.path.join(complete_run, "CopyComplete.txt"), "w").close()
+        copyfile(
+            os.path.join(TEST_DATA_DIR, "example_samplesheet.csv"),
+            os.path.join(complete_run, "samplesheet.csv"),
+        )
+
+        with self.subTest("testing log message"):
+            with self.assertLogs("s3_upload", level="DEBUG") as log:
+                to_upload, part_uploaded = utils.get_runs_to_upload(
+                    monitor_dirs=[sequencer_output_dir],
+                    sample_pattern="foo_bar",
+                )
+
+                expected_log_message = (
+                    "One or more samples in samplesheet do not match the"
+                    " sample pattern from the config [foo_bar], run will not"
+                    " be uploaded"
+                )
+
+                self.assertIn(expected_log_message, "".join(log.output))
+
+        with self.subTest("run not returned to upload"):
+            self.assertEqual((to_upload, part_uploaded), ([], {}))
 
         rmtree(sequencer_output_dir)
 
