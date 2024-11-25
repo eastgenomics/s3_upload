@@ -29,6 +29,7 @@ jobs:
         echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
     - name: Make coverage badge
       uses: schneegans/dynamic-badges-action@v1.4.0
+      if: github.ref == 'refs/heads/main'  # only update badge when we push to main
       with:
         # Required secrets:
         # - GIST_TOKEN: Create a GitHub PAT with 'gist' scope at https://github.com/settings/tokens
