@@ -221,6 +221,7 @@ def monitor_directories_for_upload(config, dry_run):
             monitor_dir_config.get("monitored_directories"),
             log_dir=log_dir,
             sample_pattern=monitor_dir_config.get("sample_regex"),
+            max_age=config.get("max_age", 72),
         )
 
         for run_dir in completed_runs:
@@ -386,12 +387,13 @@ def main() -> None:
         upload_single_run(args)
     else:
         config = read_config(config=args.config)
+        verify_config(config=config)
 
         log_dir = config.get("log_dir", "/var/log/s3_upload")
-
         lock_fd = acquire_lock(lock_file=path.join(log_dir, "s3_upload.lock"))
 
-        verify_config(config=config)
+        if config.get("log_level"):
+            log.setLevel(config.get("log_level"))
 
         set_file_handler(log, log_dir=log_dir)
 

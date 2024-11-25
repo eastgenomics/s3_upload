@@ -1,6 +1,7 @@
-# AWS S3 upload
+# AWS S3 Upload
 
 ![pytest](https://github.com/eastgenomics/s3_upload/actions/workflows/pytest.yml/badge.svg)
+![coverage-badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/jethror1/d591ef748f8a2c40c21ceedcad88a80e/raw/covbadge.json)
 
 Uploads Illumina sequencing runs into AWS S3 storage.
 
@@ -46,6 +47,7 @@ The behaviour for monitoring of directories for sequencing runs to upload is con
 The top level keys that may be defined include:
 * `max_cores` (`int` | optional): maximum number of CPU cores to split uploading across (default: maximum available)
 * `max_threads` (`int` | optional): the maximum number of threads to use per CPU core
+* `max_age` (`int` | optional): maximum age in hours of a complete run to monitor for upload, determined from mtime of `RunInfo.xml` (default: 72h). For example, setting `max_age: 48` will only upload runs created (or `RunInfo.xml` modified) within the last 48 hours.
 * `log_level` (`str` | optional): the level of logging to set, available options are defined [here](https://docs.python.org/3/library/logging.html#logging-levels)
 * `log_dir` (`str` | optional): path to where to store logs (default: `/var/log/s3_upload`)
 * `slack_log_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on successful uploads, will try use `slack_alert_webhook` if not specified (see [Slack](https://github.com/eastgenomics/s3_upload?tab=readme-ov-file#slack) below for details).
@@ -184,6 +186,7 @@ Several [end to end test scenarios](https://github.com/eastgenomics/s3_upload/tr
 
 ## :pen: Notes
 * When running in monitor mode, a file lock is acquired on `s3_upload.lock`, which by default will be written into the log directory. This ensures only a single upload process may run at once, preventing duplicate concurrent uploads of the same files.
+* To prompt a run older than `max_age` as defined from the config file to be uploaded, the `mtime` of the `RunInfo.xml` can be updated with `touch /path/to/run_dir/RunInfo.xml`
 
 
 ## :hook: Pre-commit Hooks

@@ -1,0 +1,35 @@
+[Header]
+IEMFileVersion,4
+Investigator,scientist_1
+Experiment,my_experiment
+Date,Wed Oct 23 11:59:19 GMT 2024
+Workflow,GenerateFASTQ
+Application,NovaSeq FASTQ Only
+Assay,
+Description,assay_1
+Chemistry,Default
+
+[Reads]
+101
+101
+
+[Settings]
+AdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC
+AdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA
+AdapterBehavior,trim
+MinimumTrimmedReadLength,35
+MaskShortReads,35
+OverrideCycles,U7N1Y93;I10;I10;U7N1Y93
+
+[Data]
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,Index_ID,index,index2,Sample_Type,Pair_ID
+sample_1_assay_1,sample_1_assay_1,NV1079290-LIB,A1,UDP0001,GAACTGAGCG,CGCTCCACGA,DNA,sample_1_assay_1
+sample_2_assay_1,sample_2_assay_1,NV1079290-LIB,B1,UDP0002,AGGTCAGATA,TATCTTGTAG,DNA,sample_2_assay_1
+sample_3_assay_1,sample_3_assay_1,NV1079290-LIB,C1,UDP0003,CGTCTCATAT,AGCTACTATA,DNA,sample_3_assay_1
+sample_4_assay_1,sample_4_assay_1,NV1079290-LIB,D1,UDP0004,ATTCCATAAG,CCACCAGGCA,DNA,sample_4_assay_1
+sample_5_assay_1,sample_5_assay_1,NV1079290-LIB,E1,UDP0005,GACGAGATTA,AGGATAATGT,DNA,sample_5_assay_1
+sample_6_assay_1,sample_6_assay_1,NV1079290-LIB,F1,UDP0006,AACATCGCGC,ACAAGTGGAC,DNA,sample_6_assay_1
+sample_7_assay_1,sample_7_assay_1,NV1079290-LIB,G1,UDP0007,CTAGTGCTCT,TACTGTTCCA,DNA,sample_7_assay_1
+sample_8_assay_1,sample_8_assay_1,NV1079290-LIB,H1,UDP0008,GATCAAGGCA,ATTAACAAGG,DNA,sample_8_assay_1
+sample_9_assay_1,sample_9_assay_1,NV1079290-LIB,A2,UDP0009,GACTGAGTAG,CACTATCAAC,DNA,sample_9_assay_1
+sample_10_assay_1,sample_10_assay_1,NV1079290-LIB,B2,UDP0010,AGTCAGACGA,TGTCGCTGGT,DNA,sample_10_assay_1

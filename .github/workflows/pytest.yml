@@ -5,9 +5,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python 3.8
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
     - name: Install dependencies
@@ -21,3 +21,26 @@ jobs:
         sudo mkdir /var/log/s3_upload
         sudo chmod o+w /var/log/s3_upload
         pytest -v --cov --count 10 --random-order tests/unit/
+    - name: Get test coverage % from pytest output for coverage badge
+      run: |
+        pytest --cov --cov-report xml tests/unit/
+        coverage_raw=$(head -n2 coverage.xml | grep -Po '(?<=line-rate=\").*?(?=")')
+        TOTAL=$(printf "%.2f" "$(echo "${coverage_raw} * 100" | bc -l)")
+        echo "total=${TOTAL}" >> $GITHUB_ENV
+        echo "### Total coverage: ${TOTAL}%" >> $GITHUB_STEP_SUMMARY
+    - name: Make coverage badge
+      # Badge in the readme to use to display the coverage % using: https://github.com/Schneegans/dynamic-badges-action/
+      uses: schneegans/dynamic-badges-action@v1.7.0
+      if: github.ref == 'refs/heads/main'  # only update badge when we push to main
+      with:
+        # Required secrets:
+        # - GIST_TOKEN: Create a GitHub PAT with 'gist' scope at https://github.com/settings/tokens
+        # - GIST_ID: Create a new gist at https://gist.github.com and use its ID, used for the covbadge.json with badge from shields.io
+        auth: ${{ secrets.GIST_TOKEN }}
+        gistID: ${{ secrets.GIST_ID }}
+        filename: covbadge.json
+        label: Coverage
+        message: ${{ env.total }}%
+        minColorRange: 50
+        maxColorRange: 90
+        valColorRange: ${{ env.total }}
