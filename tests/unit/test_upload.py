@@ -1,7 +1,7 @@
 from concurrent.futures import Future
 import re
 import unittest
-from unittest.mock import ANY, call, patch
+from unittest.mock import ANY, call, Mock, patch
 
 import boto3
 from botocore import exceptions as s3_exceptions
@@ -544,9 +544,14 @@ class TestMultiCoreUpload(unittest.TestCase):
     @patch("s3_upload.utils.upload.as_completed")
     @patch("s3_upload.utils.upload._submit_to_pool")
     @patch("s3_upload.utils.upload.ProcessPoolExecutor")
-    def test_returned_file_mapping_correct_for_failed_uploads(
+    def test_returned_file_mapping_correct_for_failed_upload_in_child_thread(
         self, mock_pool, mock_submit, mock_completed
     ):
+        """
+        Test that if an error occurs in the child ThreadPoolExecutor and
+        returns a list of files that failed to upload that these are merged
+        and returned
+        """
         # each ProcessPool should return a dict mapping from each ThreadPool
         # of local file to remote object ID, these should then be finally
         # merged and returned as a single level dict
@@ -605,3 +610,56 @@ class TestMultiCoreUpload(unittest.TestCase):
 
         with self.subTest("no failed uploads"):
             self.assertEqual(failed_files, expected_failed_files)
+
+    @patch("s3_upload.utils.upload.as_completed")
+    @patch("s3_upload.utils.upload._submit_to_pool")
+    @patch("s3_upload.utils.upload.ProcessPoolExecutor")
+    def test_exception_correctly_handled_from_parent_process(
+        self, mock_pool, mock_submit, mock_completed
+    ):
+        """
+        Test that if an error occurs in one of the main ProcessPoolExecutors
+        and that we catch this to not actually exit, the error will be logged
+        and failed set of upload files returned for alerting via Slack and
+        retrying on next call
+        """
+        # set a submitted future to mock a single core upload, we will
+        # raise an exception for when accessing its result object
+        submitted_futures = [Mock()]
+        submitted_futures[0].result.side_effect = RuntimeError(
+            "unhandled test exception"
+        )
+        mock_completed.return_value = submitted_futures
+
+        mock_submit.return_value = {submitted_futures[0]: self.local_files}
+
+        with self.subTest("Error correctly caught and logged"):
+            expected_error = (
+                "Failed uploading 3 files for a single ProcessPool due to an"
+                " unhandled error: unhandled test exception"
+            )
+            with self.assertLogs("s3_upload", level="ERROR") as log:
+                upload.multi_core_upload(
+                    files=self.local_files,
+                    bucket="test_bucket",
+                    remote_path="/",
+                    cores=1,
+                    threads=1,
+                    parent_path="/path/to/monitored_dir/",
+                )
+
+                self.assertIn(expected_error, "".join(log.output))
+
+        with self.subTest("correctly returned no upload and all failed files"):
+            uploaded_files, failed_files = upload.multi_core_upload(
+                files=self.local_files,
+                bucket="test_bucket",
+                remote_path="/",
+                cores=1,
+                threads=1,
+                parent_path="/path/to/monitored_dir/",
+            )
+
+            self.assertEqual(
+                (uploaded_files, failed_files), ({}, self.local_files)
+            )
