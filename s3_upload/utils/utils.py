@@ -95,10 +95,7 @@ def check_run_age_within_limit(run_dir, max_age=72) -> bool:
         path.getmtime(path.join(run_dir, "RunInfo.xml"))
     )
 
-    if modified_time > now - timedelta(hours=int(max_age)):
-        return True
-    else:
-        return False
+    return modified_time > now - timedelta(hours=int(max_age))
 
 
 def check_upload_state(
@@ -470,7 +467,7 @@ def verify_config(config) -> None:
         errors.append("max_threads must be an integer")
 
     if not isinstance(config.get("max_age", 0), int):
-        errors.append("max_age must be an integer")
+        errors.append("max_age must be a positive integer")
 
     if config.get("log_level"):
         level = config.get("log_level")
