@@ -450,8 +450,6 @@ class TestGetRunsToUpload(unittest.TestCase):
         that the error is logged and continues
         """
         mock_read.return_value = None
-        # mock_uploadable.return_value = True
-        # mock_state.return_value = ("uploaded", [])
 
         sequencer_output_dir = os.path.join(TEST_DATA_DIR, uuid4().hex)
         complete_run = os.path.join(
@@ -513,7 +511,7 @@ class TestGetRunsToUpload(unittest.TestCase):
 
                 self.assertIn(expected_log_message, "".join(log.output))
 
-        with self.subTest('run not returned to upload'):
+        with self.subTest("run not returned to upload"):
             self.assertEqual((to_upload, part_uploaded), ([], {}))
 
         rmtree(sequencer_output_dir)
