@@ -47,7 +47,7 @@ The behaviour for monitoring of directories for sequencing runs to upload is con
 The top level keys that may be defined include:
 * `max_cores` (`int` | optional): maximum number of CPU cores to split uploading across (default: maximum available)
 * `max_threads` (`int` | optional): the maximum number of threads to use per CPU core
-* `max_age` (`int` | optional): maximum age of a complete run to monitor for upload, determined from mtime of `RunInfo.xml` (default: 72h)
+* `max_age` (`int` | optional): maximum age in hours of a complete run to monitor for upload, determined from mtime of `RunInfo.xml` (default: 72h)
 * `log_level` (`str` | optional): the level of logging to set, available options are defined [here](https://docs.python.org/3/library/logging.html#logging-levels)
 * `log_dir` (`str` | optional): path to where to store logs (default: `/var/log/s3_upload`)
 * `slack_log_webhook` (`str` | optional): Slack webhook URL to use for sending notifications on successful uploads, will try use `slack_alert_webhook` if not specified (see [Slack](https://github.com/eastgenomics/s3_upload?tab=readme-ov-file#slack) below for details).
