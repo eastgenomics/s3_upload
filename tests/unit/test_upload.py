@@ -271,11 +271,6 @@ class TestUploadSingleFile(unittest.TestCase):
         )
 
 
-class TestSubmitToPool(unittest.TestCase):
-    # TODO
-    pass
-
-
 @patch("s3_upload.utils.upload.as_completed")
 @patch("s3_upload.utils.upload.upload_single_file")
 @patch("s3_upload.utils.upload.boto3.session.Session.client")
