@@ -30,8 +30,9 @@ jobs:
     - name: Make coverage badge
       uses: schneegans/dynamic-badges-action@v1.4.0
       with:
-        # GIST_TOKEN is a GitHub personal access token with scope "gist"
-        # GIST_ID is the ID of the Gist where the covbadge.json is pushed to for the shields.io
+        # Required secrets:
+        # - GIST_TOKEN: Create a GitHub PAT with 'gist' scope at https://github.com/settings/tokens
+        # - GIST_ID: Create a new gist at https://gist.github.com and use its ID, used for the covbadge.json with badge from shields.io
         # badge in the readme to use to display the coverage %, based off of:
         # https://nedbatchelder.com/blog/202209/making_a_coverage_badge.html
         auth: ${{ secrets.GIST_TOKEN }}
