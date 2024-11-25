@@ -399,36 +399,6 @@ def multi_core_upload(
     all_uploaded_files = {}
     all_failed_upload = []
 
-    with ProcessPoolExecutor(max_workers=cores) as executor:
-        concurrent_jobs = _submit_to_pool(
-            pool=executor,
-            func=multi_thread_upload,
-            item_input="files",
-            items=files,
-            bucket=bucket,
-            remote_path=remote_path,
-            parent_path=parent_path,
-            threads=threads,
-        )
-
-        for future in as_completed(concurrent_jobs):
-            # access returned output as each is returned in any order
-            try:
-                uploaded_files, failed_upload = future.result()
-
-                all_uploaded_files = {**all_uploaded_files, **uploaded_files}
-                all_failed_upload.extend(failed_upload)
-            except Exception as exc:
-                # catch any other errors that might get raised from the
-                # ProcessPool but not handled in the child ThreadPool
-                all_failed_upload.extend(concurrent_jobs[future])
-                log.error(
-                    "Failed uploading %s files for a single ProcessPool due to"
-                    " an unhandled error: %s",
-                    len(concurrent_jobs[future]),
-                    exc,
-                )
-
     pool_executor = ProcessPoolExecutor(max_workers=cores)
     concurrent_jobs = _submit_to_pool(
         pool=pool_executor,
@@ -445,7 +415,6 @@ def multi_core_upload(
         # access returned output as each is returned in any order
         try:
             uploaded_files, failed_upload = future.result()
-            print("resulted")
 
             all_uploaded_files = {**all_uploaded_files, **uploaded_files}
             all_failed_upload.extend(failed_upload)
@@ -453,7 +422,6 @@ def multi_core_upload(
             # catch any other errors that might get raised from the
             # ProcessPool but not handled in the child ThreadPool
             all_failed_upload.extend(concurrent_jobs[future])
-            print("foo bar")
             log.error(
                 "Failed uploading %s files for a single ProcessPool due to"
                 " an unhandled error: %s",
@@ -463,12 +431,13 @@ def multi_core_upload(
 
     pool_executor.shutdown(wait=True)
 
-    log.info(
-        "Successfully uploaded %s files to %s:%s",
-        len(all_uploaded_files.keys()),
-        bucket,
-        remote_path,
-    )
+    if all_uploaded_files:
+        log.info(
+            "Successfully uploaded %s files to %s:%s",
+            len(all_uploaded_files.keys()),
+            bucket,
+            remote_path,
+        )
     if all_failed_upload:
         log.error(
             "%s files failed to upload and will be logged for retrying",
