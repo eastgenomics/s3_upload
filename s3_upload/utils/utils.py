@@ -263,6 +263,12 @@ def get_runs_to_upload(
                     samplesheet_contents=samplesheet_contents,
                     sample_pattern=sample_pattern,
                 ):
+                    log.debug(
+                        "One or more samples in samplesheet do not match the"
+                        " sample pattern from the config [%s], run will not be"
+                        " uploaded",
+                        sample_pattern,
+                    )
                     continue
 
             upload_state, uploaded_files = check_upload_state(
