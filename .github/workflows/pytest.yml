@@ -31,7 +31,7 @@ jobs:
     - name: Make coverage badge
       # Badge in the readme to use to display the coverage % using: https://github.com/Schneegans/dynamic-badges-action/
       uses: schneegans/dynamic-badges-action@v1.7.0
-      if: github.ref == 'refs/heads/main'  # only update badge when we push to main
+      # if: github.ref == 'refs/heads/main'  # only update badge when we push to main
       with:
         # Required secrets:
         # - GIST_TOKEN: Create a GitHub PAT with 'gist' scope at https://github.com/settings/tokens
