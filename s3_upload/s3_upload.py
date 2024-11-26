@@ -118,7 +118,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def upload_single_run(args):
+def upload_single_run(args) -> None:
     """
     Upload provided single run directory into AWS S3
 
@@ -174,7 +174,7 @@ def upload_single_run(args):
     )
 
 
-def monitor_directories_for_upload(config, dry_run):
+def monitor_directories_for_upload(config, dry_run) -> None:
     """
     Monitor specified directories for complete sequencing runs to upload
 
