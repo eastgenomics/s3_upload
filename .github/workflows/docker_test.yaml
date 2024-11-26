@@ -1,6 +1,5 @@
 name: Docker build test
-on: [push, pull_request]
-
+on: pull_request
 
 jobs:
   test_docker_image_build:
@@ -13,8 +12,7 @@ jobs:
 
       - name: Build Docker image
         id: build_image
-        run: |
-          ls
-          docker build -t s3_upload:test .
-      - name: check built image
-        run: docker run s3_upload:test
+        run: docker build -t s3_upload:gh_action_test .
+
+      - name: Check built image
+        run: docker run s3_upload:gh_action_test
