@@ -12,13 +12,13 @@ FORMATTER = logging.Formatter(
 )
 
 
-def get_console_handler():
+def get_console_handler() -> logging.StreamHandler:
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(FORMATTER)
     return console_handler
 
 
-def set_file_handler(logger, log_dir) -> None:
+def set_file_handler(logger, log_dir) -> logging.Logger:
     """
     Set the file handler to redirect all logs to log file `s3_upload.log`
     in the specified directory
@@ -29,6 +29,11 @@ def set_file_handler(logger, log_dir) -> None:
         logging handler
     log_dir : str
         path to where to write log file to
+
+    Returns
+    -------
+    logging.Logger
+        logging handler
     """
     log_file = os.path.join(log_dir, "s3_upload.log")
 
@@ -103,12 +108,6 @@ def get_logger(
     -------
     logging.Logger
         handle to configured logger
-
-    Raises
-    ------
-    AssertionError
-        raised when the specified log directory is not writeable if it
-        already exists
     """
     if logging.getLogger(logger_name).handlers:
         # logger already exists => use it
