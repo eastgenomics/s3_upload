@@ -25,7 +25,7 @@ AWS_ACCESS_KEY = environ.get("AWS_ACCESS_KEY")
 log = get_logger("s3_upload")
 
 
-def check_aws_access(slack_alert_webhook=None):
+def check_aws_access(slack_alert_webhook=None) -> List[dict]:
     """
     Check authentication with AWS S3 with stored credentials by checking
     access to all buckets
@@ -36,7 +36,7 @@ def check_aws_access(slack_alert_webhook=None):
     Returns
     -------
     list
-        list of available S3 buckets
+        list of available S3 bucket details
 
     Raises
     ------
@@ -182,7 +182,7 @@ def check_buckets_exist(buckets, slack_alert_webhook=None) -> List[dict]:
 
 def upload_single_file(
     s3_client, bucket, remote_path, local_file, parent_path
-):
+) -> Tuple[str, str]:
     """
     Uploads single file into S3 storage bucket
 
