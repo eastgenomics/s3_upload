@@ -1,8 +1,6 @@
 name: Docker build test
 on: [push, pull_request]
 
-# allows to manually run the job at any time
-workflow_dispatch:
 
 jobs:
   test_docker_image_build:
