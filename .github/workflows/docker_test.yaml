@@ -1,0 +1,22 @@
+name: Docker build test
+on: [push, pull_request]
+
+# allows to manually run the job at any time
+workflow_dispatch:
+
+jobs:
+  test_docker_image_build:
+    name: Test building Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        id: checkout_code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        id: build_image
+        run: |
+          ls
+          docker build -t s3_upload:test .
+      - name: check built image
+        run: docker run s3_upload:test
