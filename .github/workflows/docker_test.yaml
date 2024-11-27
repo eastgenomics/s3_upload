@@ -1,0 +1,18 @@
+name: Docker build test
+on: pull_request
+
+jobs:
+  test_docker_image_build:
+    name: Test building Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        id: checkout_code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        id: build_image
+        run: docker build -t s3_upload:gh_action_test .
+
+      - name: Check built image
+        run: docker run s3_upload:gh_action_test

@@ -460,6 +460,11 @@ def verify_config(config) -> None:
     ----------
     config : dict
         contents of config file to check
+
+    Raises
+    ------
+    RuntimeError
+        Raised when one or more keys in config are invalid
     """
     log.debug(
         "Verifying contents of config are valid, contents parsed: %s", config
