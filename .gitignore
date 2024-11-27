@@ -157,6 +157,7 @@ cython_debug/
 # s3_upload specific exclusions
 tmp/*
 ./*.json
+*tar*
 tests/e2e/test_data/logs/*
 tests/e2e/test_data/tmp/*
 tests/e2e/test_data/sequencer_*
