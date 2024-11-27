@@ -1,5 +1,8 @@
 FROM python:3.8-alpine
 
+LABEL title="AWS S3 Upload" \
+      description="Uploads Illumina sequencing runs into Amazon S3 storage"
+
 COPY requirements.txt requirements.txt
 
 # - Install gcc and dependencies (required for compiling psutil)
