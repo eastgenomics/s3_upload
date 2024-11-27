@@ -167,7 +167,12 @@ optional arguments:
 ```
 
 > [!IMPORTANT]
-> Both the `--local_path` for single run upload, and `monitored_directories` paths for monitoring, must be relative to where they are mounted into the container (i.e. if you mount the sequencer output to `/sequencer_output/` then your paths would be `--local_path /sequencer_output/run_A/` and `/sequencer_output/` for single upload and monitoring, respectively). In addition, for monitoring you must ensure to mount the log directory outside of the container to be persistent (i.e. using the default log location: `--volume /local/log/dir:/var/log/s3_upload`. If this is not done when the container shuts down, all runs will be identified as new on the next upload run and will attempt to be uploaded.)
+> Both the `--local_path` for single run upload, and `monitored_directories` paths for monitoring, must be relative to where they are mounted into the container (i.e. if you mount the sequencer output to `/sequencer_output/` then your paths would be `--local_path /sequencer_output/run_A/` and `/sequencer_output/` for single upload and monitoring, respectively). In addition, for monitoring you must ensure to mount the log directory outside of the container to be persistent (i.e. using the default log location: `--volume /local/log/dir:/var/log/s3_upload`. If this is not done when the container shuts down, all runs will be identified as new on the next upload run and will attempt to be uploaded).
+
+> [!TIP]
+> * The required environment variables for [AWS authentication](https://github.com/eastgenomics/s3_upload/tree/main?tab=readme-ov-file#closed_lock_with_key-aws-authentication) can be provided with either `--env-file` as a file or individually with `--env`
+>
+> * When running in monitor mode, the config file may be mounted with `--volume /local/path/to/config.json:/app/config.json` and then passed as an argument as `--config /app/config.json`
 
 
 ## <img src="images/slack.png" width="22"/> Slack
