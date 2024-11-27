@@ -186,7 +186,7 @@ Several [end to end test scenarios](https://github.com/eastgenomics/s3_upload/tr
 
 ## :pen: Notes
 * When running in monitor mode, a file lock is acquired on `s3_upload.lock`, which by default will be written into the log directory. This ensures only a single upload process may run at once, preventing duplicate concurrent uploads of the same files.
-  * When running via Docker you must ensure that the `--rm` flag is provided to `docker run` to ensure the container is automatically removed on exit. If not, the exited container may still hold a file lock on the lock file, preventing subsequent calls to the uploader.
+  * When running via Docker, you must ensure that the `--rm` flag is provided to `docker run` to ensure the container is automatically removed on exit. If not, the exited container may still hold a file lock on the lock file, preventing subsequent calls to the uploader.
 * To prompt a run older than `max_age` as defined from the config file to be uploaded, the `mtime` of the `RunInfo.xml` can be updated with `touch /path/to/run_dir/RunInfo.xml`
 
 
