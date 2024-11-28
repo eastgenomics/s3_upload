@@ -290,7 +290,9 @@ def get_runs_to_upload(
                 partially_uploaded[sub_dir] = uploaded_files
             else:
                 # only try upload a newly picked up run if it's within age limit
-                if not check_run_age_within_limit(sub_dir):
+                if not check_run_age_within_limit(
+                    run_dir=sub_dir, max_age=max_age
+                ):
                     log.debug(
                         "%s older than maximum age (%s h) to monitor for"
                         " upload and will not be uploaded",
