@@ -1,4 +1,4 @@
-"General IO related methods"
+"""General IO related methods"""
 
 import atexit
 from datetime import datetime
