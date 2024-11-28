@@ -1,4 +1,5 @@
 import argparse
+import atexit
 from os import cpu_count, makedirs, path
 from pathlib import Path
 import sys
@@ -7,7 +8,6 @@ from timeit import default_timer as timer
 from utils.io import (
     acquire_lock,
     read_config,
-    release_lock,
     write_upload_state_to_log,
 )
 from utils.upload import (
@@ -398,8 +398,6 @@ def main() -> None:
         set_file_handler(log, log_dir=log_dir)
 
         monitor_directories_for_upload(config=config, dry_run=args.dry_run)
-
-        release_lock(lock_fd)
 
 
 if __name__ == "__main__":
