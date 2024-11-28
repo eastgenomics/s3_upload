@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os
 import re
 from shutil import copyfile, rmtree
@@ -346,49 +347,61 @@ class TestGetRunsToUpload(unittest.TestCase):
 
         rmtree(sequencer_output_dir)
 
-    def test_runs_over_max_age_skipped(self):
+    def test_checking_run_age_against_max_age_is_correct(self):
         """
         Runs to not monitor are determined from the max_age value stored
-        in the config, and mtime of the RunInfo.xml file
+        in the config, and mtime of the RunInfo.xml file.
+
+        Test if they are older than the given age that they are correctly
+        skipped, and if within the given max age they are correctly
+        included.
         """
         sequencer_output_dir = os.path.join(TEST_DATA_DIR, uuid4().hex)
-        old_run = os.path.join(
+        run_dir = os.path.join(
             sequencer_output_dir, "16102023_A01295_001_ABC123"
         )
-        os.makedirs(old_run, exist_ok=True)
-        open(os.path.join(old_run, "RunInfo.xml"), "w").close()
-        open(os.path.join(old_run, "CopyComplete.txt"), "w").close()
+        os.makedirs(run_dir, exist_ok=True)
+        open(os.path.join(run_dir, "RunInfo.xml"), "w").close()
+        open(os.path.join(run_dir, "CopyComplete.txt"), "w").close()
         copyfile(
             os.path.join(TEST_DATA_DIR, "example_samplesheet.csv"),
-            os.path.join(old_run, "samplesheet.csv"),
+            os.path.join(run_dir, "samplesheet.csv"),
         )
 
-        # update the modified time of RunInfo.xml to be older than the
-        # given max age (1621091308 => 16:08:28 - 15/5/2021)
+        # update the modified time of RunInfo.xml to be 100 hours old
+        old_utime = int((datetime.now() - timedelta(hours=100)).timestamp())
         os.utime(
-            path=os.path.join(old_run, "RunInfo.xml"),
-            times=(1621091308, 1621091308),
+            path=os.path.join(run_dir, "RunInfo.xml"),
+            times=(old_utime, old_utime),
         )
 
-        to_upload, partial_upload = utils.get_runs_to_upload(
-            monitor_dirs=[sequencer_output_dir], max_age=96
-        )
-
-        with self.subTest("testing outputs are empty"):
+        # test that when the run is over max_age it is now selected for upload
+        with self.subTest("testing outputs are empty for over max_age"):
+            to_upload, partial_upload = utils.get_runs_to_upload(
+                monitor_dirs=[sequencer_output_dir], max_age=96
+            )
             self.assertTrue(to_upload == [] and partial_upload == {})
 
-        with self.subTest("testing log message"):
+        with self.subTest("testing log message for over max_age"):
             with self.assertLogs("s3_upload", level="DEBUG") as log:
                 utils.get_runs_to_upload(
                     monitor_dirs=[sequencer_output_dir], max_age=96
                 )
 
                 expected_log_message = (
-                    f"{old_run} older than maximum age (96 h) to monitor "
+                    f"{run_dir} older than maximum age (96 h) to monitor "
                     "for upload and will not be uploaded"
                 )
 
                 self.assertIn(expected_log_message, "".join(log.output))
+
+        # test that when the run age is within the max_age it is
+        # selected for upload
+        with self.subTest("testing outputs are present when within max_age"):
+            to_upload, partial_upload = utils.get_runs_to_upload(
+                monitor_dirs=[sequencer_output_dir], max_age=128
+            )
+            self.assertTrue(to_upload == [run_dir] and partial_upload == {})
 
         rmtree(sequencer_output_dir)
 
