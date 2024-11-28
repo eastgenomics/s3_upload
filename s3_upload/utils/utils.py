@@ -327,8 +327,20 @@ def get_sequencing_file_list(seq_dir, exclude_patterns=None) -> list:
     -------
     list
         sorted list of files by their file size (descending)
+
+    Raises
+    ------
+    FileNotFoundError
+        Raised if the provided directory does not exist / not accessible
     """
     log.info("Getting list of files to upload in %s", seq_dir)
+
+    if not Path(seq_dir).absolute().exists():
+        log.error("Provided directory does not exist: %s", seq_dir)
+        raise FileNotFoundError(
+            f"Provided directory does not exist: {seq_dir}"
+        )
+
     files = sorted(
         [
             (x, stat(x).st_size)

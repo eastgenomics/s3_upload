@@ -802,6 +802,13 @@ class TestGetSequencingFileList(unittest.TestCase):
                     sorted(returned_file_list), sorted(expected_files)
                 )
 
+    def test_file_not_found_error_raised_on_invalid_directory_provided(self):
+        invalid_dir = os.path.join(TEST_DATA_DIR, uuid4().hex)
+        expected_error = f"Provided directory does not exist: {invalid_dir}"
+
+        with pytest.raises(FileNotFoundError, match=re.escape(expected_error)):
+            utils.get_sequencing_file_list(seq_dir=invalid_dir)
+
 
 class TestGetSamplenamesFromSamplesheet(unittest.TestCase):
     samplesheet_contents = [
