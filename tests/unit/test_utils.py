@@ -806,9 +806,7 @@ class TestGetSequencingFileList(unittest.TestCase):
         invalid_dir = os.path.join(TEST_DATA_DIR, uuid4().hex)
         expected_error = f"Provided directory does not exist: {invalid_dir}"
 
-        with pytest.raises(
-            FileNotFoundError, match=re.escape(expected_error)
-        ):
+        with pytest.raises(FileNotFoundError, match=re.escape(expected_error)):
             utils.get_sequencing_file_list(seq_dir=invalid_dir)
 
 
