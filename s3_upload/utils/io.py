@@ -1,5 +1,6 @@
 "General IO related methods"
 
+import atexit
 from datetime import datetime
 from fcntl import flock, LOCK_EX, LOCK_NB, LOCK_UN
 import json
@@ -53,6 +54,10 @@ def acquire_lock(lock_file="/var/log/s3_upload/s3_upload.lock") -> int:
             f" {datetime.now().strftime('%H:%M:%S')} from process"
             f" {os.getpid()}".encode(),
         )
+
+        # register the file lock to be released on exit
+        atexit.register(release_lock, lock_fd=lock_fd)
+
     except BlockingIOError:
         print(
             f"Could not acquire exclusive lock on {lock_file}, assuming"
@@ -60,8 +65,6 @@ def acquire_lock(lock_file="/var/log/s3_upload/s3_upload.lock") -> int:
         )
         os.close(lock_fd)
         sys.exit(0)
-
-    return lock_fd
 
 
 def release_lock(lock_fd) -> None:
