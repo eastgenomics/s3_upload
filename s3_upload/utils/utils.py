@@ -336,6 +336,7 @@ def get_sequencing_file_list(seq_dir, exclude_patterns=None) -> list:
     log.info("Getting list of files to upload in %s", seq_dir)
 
     if not Path(seq_dir).absolute().exists():
+        log.error("Provided directory does not exist: %s", seq_dir)
         raise FileNotFoundError(
             f"Provided directory does not exist: {seq_dir}"
         )
