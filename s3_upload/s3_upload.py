@@ -1,5 +1,4 @@
 import argparse
-import atexit
 from os import cpu_count, makedirs, path
 from pathlib import Path
 import sys
