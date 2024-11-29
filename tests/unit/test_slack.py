@@ -11,7 +11,7 @@ class TestFormatCompleteMessage(unittest.TestCase):
 
         expected_message = (
             ":white_check_mark:  *S3 Upload*: Successfully uploaded 2"
-            " runs\n\t• run_1\n\t• run_2"
+            " runs\n\t\t• run_1\n\t\t• run_2"
         )
 
         self.assertEqual(compiled_message, expected_message)
@@ -20,7 +20,8 @@ class TestFormatCompleteMessage(unittest.TestCase):
         compiled_message = slack.format_message(failed=["run_3", "run_4"])
 
         expected_message = (
-            ":x:  *S3 Upload*: Failed uploading 2 runs\n\t• run_3\n\t• run_4"
+            ":x:  *S3 Upload*: Failed uploading 2 runs\n\t\t• run_3\n\t\t•"
+            " run_4"
         )
 
         self.assertEqual(compiled_message, expected_message)
@@ -32,9 +33,9 @@ class TestFormatCompleteMessage(unittest.TestCase):
 
         expected_message = (
             ":white_check_mark:  *S3 Upload*: Successfully uploaded 2"
-            " runs\n\t• run_1\n\t• run_2\n\n"
+            " runs\n\t\t• run_1\n\t\t• run_2\n\n"
             ":x:  *S3 Upload*: Failed uploading 2 runs"
-            "\n\t• run_3\n\t• run_4"
+            "\n\t\t• run_3\n\t\t• run_4"
         )
 
         self.assertEqual(compiled_message, expected_message)
