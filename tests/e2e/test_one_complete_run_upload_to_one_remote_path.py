@@ -23,11 +23,10 @@ from e2e.helper import (
     cleanup_local_test_files,
     cleanup_remote_files,
     create_files,
+    read_stdout_stderr_log,
 )
 
 from s3_upload.s3_upload import main as s3_upload_main
-
-TODAY = datetime.now().strftime("%Y-%m-%d")
 
 
 class TestSingleCompleteRun(unittest.TestCase):
@@ -104,10 +103,7 @@ class TestSingleCompleteRun(unittest.TestCase):
         s3_upload_main()
 
         # capture the stdout/stderr logs written to log file for testing
-        with open(
-            os.path.join(TEST_DATA_DIR, f"logs/s3_upload.log.{TODAY}"), "r"
-        ) as fh:
-            cls.upload_log = fh.read().splitlines()
+        cls.upload_log = read_stdout_stderr_log()
 
     @classmethod
     def tearDownClass(cls):

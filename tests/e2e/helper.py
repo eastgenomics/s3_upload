@@ -2,6 +2,7 @@
 Simple helper functions used in most tests for set up and clean up
 """
 
+from datetime import datetime
 from glob import glob
 import json
 from os import makedirs, path, remove
@@ -115,7 +116,10 @@ def read_stdout_stderr_log() -> list:
         contents of log file
     """
     with open(
-        path.join(TEST_DATA_DIR, "logs/s3_upload.log"),
+        path.join(
+            TEST_DATA_DIR,
+            f"logs/s3_upload.log.{datetime.now().strftime('%Y-%m-%d')}",
+        ),
         encoding="utf8",
         mode="r",
     ) as fh:
