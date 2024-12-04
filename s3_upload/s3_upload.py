@@ -1,5 +1,4 @@
 import argparse
-import atexit
 from os import cpu_count, makedirs, path
 from pathlib import Path
 import sys
@@ -390,7 +389,7 @@ def main() -> None:
         verify_config(config=config)
 
         log_dir = config.get("log_dir", "/var/log/s3_upload")
-        lock_fd = acquire_lock(lock_file=path.join(log_dir, "s3_upload.lock"))
+        acquire_lock(lock_file=path.join(log_dir, "s3_upload.lock"))
 
         if config.get("log_level"):
             log.setLevel(config.get("log_level"))

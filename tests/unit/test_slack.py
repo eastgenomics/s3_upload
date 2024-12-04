@@ -6,12 +6,29 @@ from s3_upload.utils import slack
 
 
 class TestFormatCompleteMessage(unittest.TestCase):
+    def test_suffix_set_correctly_for_one_run(self):
+        """
+        Test that when there is only one completed / failed upload that we
+        drop the `s` from runs for correct Englishness
+        """
+        compiled_message = slack.format_message(
+            completed=["run_1"], failed=["run_2"]
+        )
+
+        expected_message = (
+            ":white_check_mark:  *S3 Upload*: Successfully uploaded 1"
+            " run\n\t\t• run_1\n\n:x:  *S3 Upload*: Failed uploading 1"
+            " run\n\t\t• run_2"
+        )
+
+        self.assertEqual(compiled_message, expected_message)
+
     def test_completed_upload_message_correct(self):
         compiled_message = slack.format_message(completed=["run_1", "run_2"])
 
         expected_message = (
             ":white_check_mark:  *S3 Upload*: Successfully uploaded 2"
-            " runs\n\t:black_square: run_1\n\t:black_square: run_2"
+            " runs\n\t\t• run_1\n\t\t• run_2"
         )
 
         self.assertEqual(compiled_message, expected_message)
@@ -20,8 +37,8 @@ class TestFormatCompleteMessage(unittest.TestCase):
         compiled_message = slack.format_message(failed=["run_3", "run_4"])
 
         expected_message = (
-            ":x:  *S3 Upload*: Failed uploading 2 runs"
-            "\n\t:black_square: run_3\n\t:black_square: run_4"
+            ":x:  *S3 Upload*: Failed uploading 2 runs\n\t\t• run_3\n\t\t•"
+            " run_4"
         )
 
         self.assertEqual(compiled_message, expected_message)
@@ -33,9 +50,9 @@ class TestFormatCompleteMessage(unittest.TestCase):
 
         expected_message = (
             ":white_check_mark:  *S3 Upload*: Successfully uploaded 2"
-            " runs\n\t:black_square: run_1\n\t:black_square: run_2\n\n"
+            " runs\n\t\t• run_1\n\t\t• run_2\n\n"
             ":x:  *S3 Upload*: Failed uploading 2 runs"
-            "\n\t:black_square: run_3\n\t:black_square: run_4"
+            "\n\t\t• run_3\n\t\t• run_4"
         )
 
         self.assertEqual(compiled_message, expected_message)

@@ -23,6 +23,7 @@ from e2e.helper import (
     cleanup_local_test_files,
     cleanup_remote_files,
     create_files,
+    read_stdout_stderr_log,
 )
 
 from s3_upload.s3_upload import main as s3_upload_main
@@ -102,10 +103,7 @@ class TestSingleCompleteRun(unittest.TestCase):
         s3_upload_main()
 
         # capture the stdout/stderr logs written to log file for testing
-        with open(
-            os.path.join(TEST_DATA_DIR, "logs/s3_upload.log"), "r"
-        ) as fh:
-            cls.upload_log = fh.read().splitlines()
+        cls.upload_log = read_stdout_stderr_log()
 
     @classmethod
     def tearDownClass(cls):
@@ -224,7 +222,7 @@ class TestSingleCompleteRun(unittest.TestCase):
         with self.subTest("message formatted as expected"):
             expected_message = (
                 ":white_check_mark:  *S3 Upload*: Successfully uploaded 1"
-                " runs\n\t:black_square: run_1"
+                " run\n\t\t• run_1"
             )
 
             self.assertEqual(

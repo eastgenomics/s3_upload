@@ -244,8 +244,7 @@ class TestInterruptAndResume(unittest.TestCase):
             expected_call_args = {
                 "url": "https://slack_webhook_alert_channel",
                 "message": (
-                    ":x:  *S3 Upload*: Failed uploading 1"
-                    " runs\n\t:black_square: run_1"
+                    ":x:  *S3 Upload*: Failed uploading 1 run\n\t\t• run_1"
                 ),
             }
             self.assertEqual(
@@ -257,7 +256,7 @@ class TestInterruptAndResume(unittest.TestCase):
                 "url": "https://slack_webhook_log_channel",
                 "message": (
                     ":white_check_mark:  *S3 Upload*: Successfully uploaded 1"
-                    " runs\n\t:black_square: run_1"
+                    " run\n\t\t• run_1"
                 ),
             }
 

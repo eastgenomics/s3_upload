@@ -1,9 +1,12 @@
 """Functions to handle log streams"""
 
+from datetime import date, datetime, time, timedelta
+from glob import glob
 import logging
-from logging.handlers import TimedRotatingFileHandler
+from logging import FileHandler
 import os
 from pathlib import Path
+import re
 import sys
 
 
@@ -20,7 +23,8 @@ def get_console_handler() -> logging.StreamHandler:
 
 def set_file_handler(logger, log_dir) -> logging.Logger:
     """
-    Set the file handler to redirect all logs to log file `s3_upload.log`
+    Set the file handler to redirect all logs to log file
+    `s3_upload.log.{%Y-%m-%d}`
     in the specified directory
 
     Parameters
@@ -35,29 +39,79 @@ def set_file_handler(logger, log_dir) -> logging.Logger:
     logging.Logger
         logging handler
     """
-    log_file = os.path.join(log_dir, "s3_upload.log")
-
-    if any(
-        [isinstance(x, TimedRotatingFileHandler) for x in logger.handlers]
-    ) and os.path.exists(log_file):
-        # log file handler already set and log file exists => use it
-        logger.info("Log file handler already set to %s", log_file)
-        return logger
-
-    logger.info(
-        "Initialised log fileHandler, setting log output to %s", log_file
-    )
-
     check_write_permission_to_log_dir(log_dir)
 
-    file_handler = TimedRotatingFileHandler(
-        log_file, when="midnight", backupCount=5
+    log_file = os.path.join(
+        log_dir, f"s3_upload.log.{datetime.now().strftime('%Y-%m-%d')}"
     )
+
+    existing_file_handler = [
+        x for x in logger.handlers if isinstance(x, FileHandler)
+    ]
+
+    if existing_file_handler and os.path.exists(log_file):
+        logger.debug("FileHandler already set")
+        return logger
+
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
+    Path(log_file).touch(exist_ok=True)
+
+    file_handler = FileHandler(filename=log_file)
     file_handler.setFormatter(FORMATTER)
 
     logger.addHandler(file_handler)
 
+    logger.info(
+        "Initialised log FileHandler, setting log output to %s", log_file
+    )
+
+    clear_old_logs(logger=logger, log_dir=log_dir, backup_count=5)
+
     return logger
+
+
+def clear_old_logs(logger, log_dir, backup_count) -> None:
+    """
+    Ensures that at most `backup_count` log file backups are retained.
+
+    To be called on initialising the log file handler which sets the log
+    output to a file with the current datetime stamp as suffix, this will
+    be used to delete files older than `backup_count` days.
+
+    Parameters
+    ----------
+    logger : logging.Logger
+        handle to the logger
+    log_dir : str
+        path to log directory
+    backup_count : int
+    """
+    oldest_backup_date = datetime.combine(
+        (date.today() - timedelta(days=backup_count)), time()
+    )
+
+    backup_files = [
+        (f, re.search(r"\d{4}-\d{2}-\d{2}$|$", f).group())
+        for f in glob(f"{log_dir}/s3_upload.log.*")
+    ]
+    old_backup_files = [
+        x[0]
+        for x in backup_files
+        if x[1] and datetime.strptime(x[1], "%Y-%m-%d") < oldest_backup_date
+    ]
+
+    logger.debug(
+        "%s old backup files to be removed: %s",
+        len(old_backup_files),
+        old_backup_files,
+    )
+
+    if old_backup_files:
+        for old_file in old_backup_files:
+            try:
+                os.remove(old_file)
+            except OSError:
+                logger.exception("Failed to delete old log file %s", old_file)
 
 
 def check_write_permission_to_log_dir(log_dir) -> None:
@@ -112,12 +166,6 @@ def get_logger(
     if logging.getLogger(logger_name).handlers:
         # logger already exists => use it
         return logging.getLogger(logger_name)
-
-    log_file = os.path.join(log_dir, "s3_upload.log")
-    check_write_permission_to_log_dir(log_dir)
-
-    Path(log_dir).mkdir(parents=True, exist_ok=True)
-    Path(log_file).touch(exist_ok=True)
 
     logger = logging.getLogger(logger_name)
 

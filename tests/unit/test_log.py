@@ -1,5 +1,6 @@
+from datetime import date, datetime, time, timedelta
 import logging
-from logging.handlers import TimedRotatingFileHandler
+from logging import FileHandler
 import os
 from pathlib import Path
 from shutil import rmtree
@@ -31,13 +32,18 @@ class TestSetFileHandler(unittest.TestCase):
         self.logger = log.get_logger(
             f"s3_upload_{uuid4().hex}", log_level=logging.INFO
         )
-        log.set_file_handler(self.logger, Path(__file__).parent)
+        self.log_file = os.path.join(
+            TEST_DATA_DIR,
+            f"s3_upload.log.{datetime.now().strftime('%Y-%m-%d')}",
+        )
+
+        log.set_file_handler(self.logger, TEST_DATA_DIR)
         self.logger.setLevel(5)
 
     def tearDown(self):
-        log_file = os.path.join(Path(__file__).parent, "s3_upload.log")
-        if os.path.exists(log_file):
-            os.remove(log_file)
+        log.clear_old_logs(
+            logger=self.logger, log_dir=TEST_DATA_DIR, backup_count=-1
+        )
 
     def test_file_handler_correctly_set(self):
 
@@ -48,16 +54,10 @@ class TestSetFileHandler(unittest.TestCase):
             )
 
         file_handler = [
-            x
-            for x in self.logger.handlers
-            if isinstance(x, TimedRotatingFileHandler)
+            x for x in self.logger.handlers if isinstance(x, FileHandler)
         ]
 
-        with self.subTest("correct rotation time"):
-            self.assertEqual(file_handler[0].when, "MIDNIGHT")
-
-        with self.subTest("correct backup count"):
-            self.assertEqual(file_handler[0].backupCount, 5)
+        self.assertTrue(file_handler)
 
     def test_log_file_correctly_written_to(self):
         """
@@ -67,20 +67,99 @@ class TestSetFileHandler(unittest.TestCase):
         """
         self.logger.info("testing")
 
-        with open(os.path.join(Path(__file__).parent, "s3_upload.log")) as fh:
+        with open(self.log_file) as fh:
             log_contents = fh.read()
 
         self.assertIn("INFO: testing", log_contents)
 
-    def test_setting_file_twice_returns_the_handler(self):
+    def test_setting_file_handler_twice_returns_the_handler(self):
 
         with patch(
-            "s3_upload.utils.log.check_write_permission_to_log_dir"
-        ) as mock_check:
+            "s3_upload.utils.log.logging.Handler.setFormatter"
+        ) as mock_file_handler:
             # test we hit the early return and don't continue through the function
-            log.set_file_handler(self.logger, Path(__file__).parent)
+            log.set_file_handler(self.logger, TEST_DATA_DIR)
 
-            self.assertEqual(mock_check.call_count, 0)
+            self.assertEqual(mock_file_handler.call_count, 0)
+
+
+class TestClearOldLogs(unittest.TestCase):
+    def setUp(self):
+        self.logger = log.get_logger(
+            f"s3_upload_{uuid4().hex}", log_level=logging.INFO
+        )
+
+    def tearDown(self):
+        log.clear_old_logs(
+            logger=self.logger, log_dir=TEST_DATA_DIR, backup_count=-1
+        )
+
+    def test_files_older_than_backup_count_are_deleted(self):
+        """
+        Log files older than specified `backup_count` days are determined
+        from the YY-MM-DD suffix on the file name and should be removed
+        """
+        five_days_ago = datetime.combine(
+            (date.today() - timedelta(days=5)), time()
+        ).strftime("%Y-%m-%d")
+        six_days_ago = datetime.combine(
+            (date.today() - timedelta(days=6)), time()
+        ).strftime("%Y-%m-%d")
+
+        open(
+            Path(TEST_DATA_DIR).joinpath(f"s3_upload.log.{five_days_ago}"),
+            encoding="utf-8",
+            mode="a",
+        ).close()
+        open(
+            Path(TEST_DATA_DIR).joinpath(f"s3_upload.log.{six_days_ago}"),
+            encoding="utf-8",
+            mode="a",
+        ).close()
+
+        log.clear_old_logs(
+            logger=self.logger, log_dir=TEST_DATA_DIR, backup_count=5
+        )
+
+        with self.subTest("newer log file retained"):
+            self.assertTrue(
+                os.path.exists(
+                    Path(TEST_DATA_DIR).joinpath(
+                        f"s3_upload.log.{five_days_ago}"
+                    )
+                )
+            )
+
+        with self.subTest("older log file deleted"):
+            self.assertFalse(
+                os.path.exists(
+                    Path(TEST_DATA_DIR).joinpath(
+                        f"s3_upload.log.{six_days_ago}"
+                    )
+                )
+            )
+
+    @patch("s3_upload.utils.log.os.remove")
+    def test_errors_on_deleting_caught_and_logged_but_not_raised(
+        self, mock_remove
+    ):
+        # create a log file
+        log.set_file_handler(logger=self.logger, log_dir=TEST_DATA_DIR)
+
+        today_log = Path(TEST_DATA_DIR).joinpath(
+            f"s3_upload.log.{datetime.now().strftime('%Y-%m-%d')}"
+        )
+
+        mock_remove.side_effect = OSError("file can not be deleted")
+
+        with self.assertLogs(self.logger) as log_output:
+            log.clear_old_logs(
+                logger=self.logger, log_dir=TEST_DATA_DIR, backup_count=-1
+            )
+
+            expected_log_error = f"Failed to delete old log file {today_log}"
+
+            self.assertIn(expected_log_error, "".join(log_output.output))
 
 
 class TestCheckWritePermissionToLogDir(unittest.TestCase):
