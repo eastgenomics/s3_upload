@@ -99,7 +99,7 @@ Only one authentication method may be used, if both `AWS_DEFAULT_PROFILE` and `A
 
 ## :wood: Logging
 
-All logs by default are written to `/var/log/s3_upload`. Logs from stdout and stderr are written to the file `s3_upload.log.{YY-MM-DD}`, with all logs from an invocation of the upload being written to that days log (i.e if the upload begins at 11.59pm, all logs from that upload would be written to that days file and not roll over to the next). Backups are rotated and stored in the same directory for 5 days.
+All logs by default are written to `/var/log/s3_upload`. Logs from stdout and stderr are written to the file `s3_upload.log.{YYYY-MM-DD}`, with all logs from an invocation of the upload being written to that days log (i.e if the upload begins at 11.59pm, all logs from that upload would be written to that days file and not roll over to the next). Backups are rotated and stored in the same directory for 5 days.
 
 > [!IMPORTANT]
 > Write permission is required to the default or specified log directory, if not a `PermissionError` will be raised on checking the log directory permissions.
