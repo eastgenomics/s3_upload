@@ -41,17 +41,18 @@ def set_file_handler(logger, log_dir) -> logging.Logger:
     """
     check_write_permission_to_log_dir(log_dir)
 
+    log_file = os.path.join(
+        log_dir, f"s3_upload.log.{datetime.now().strftime('%Y-%m-%d')}"
+    )
+
     existing_file_handler = [
         x for x in logger.handlers if isinstance(x, FileHandler)
     ]
 
-    if existing_file_handler:
+    if existing_file_handler and os.path.exists(log_file):
         logger.debug("FileHandler already set")
         return logger
 
-    log_file = os.path.join(
-        log_dir, f"s3_upload.log.{datetime.now().strftime('%Y-%m-%d')}"
-    )
     Path(log_dir).mkdir(parents=True, exist_ok=True)
     Path(log_file).touch(exist_ok=True)
 
