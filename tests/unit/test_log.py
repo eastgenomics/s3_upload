@@ -157,10 +157,7 @@ class TestClearOldLogs(unittest.TestCase):
                 logger=self.logger, log_dir=TEST_DATA_DIR, backup_count=-1
             )
 
-            expected_log_error = (
-                f"Failed to delete old log file {today_log}: file can not be"
-                " deleted"
-            )
+            expected_log_error = f"Failed to delete old log file {today_log}"
 
             self.assertIn(expected_log_error, "".join(log_output.output))
 

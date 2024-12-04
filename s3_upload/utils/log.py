@@ -110,10 +110,8 @@ def clear_old_logs(logger, log_dir, backup_count) -> None:
         for old_file in old_backup_files:
             try:
                 os.remove(old_file)
-            except OSError as error:
-                logger.exception(
-                    "Failed to delete old log file %s: %s", old_file, error
-                )
+            except OSError:
+                logger.exception("Failed to delete old log file %s", old_file)
 
 
 def check_write_permission_to_log_dir(log_dir) -> None:
