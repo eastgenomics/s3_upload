@@ -41,6 +41,14 @@ def set_file_handler(logger, log_dir) -> logging.Logger:
     """
     check_write_permission_to_log_dir(log_dir)
 
+    existing_file_handler = [
+        x for x in logger.handlers if isinstance(x, FileHandler)
+    ]
+
+    if existing_file_handler:
+        logger.debug("FileHandler already set")
+        return logger
+
     log_file = os.path.join(
         log_dir, f"s3_upload.log.{datetime.now().strftime('%Y-%m-%d')}"
     )
@@ -53,7 +61,7 @@ def set_file_handler(logger, log_dir) -> logging.Logger:
     logger.addHandler(file_handler)
 
     logger.info(
-        "Initialised log fileHandler, setting log output to %s", log_file
+        "Initialised log FileHandler, setting log output to %s", log_file
     )
 
     clear_old_logs(logger=logger, log_dir=log_dir, backup_count=5)

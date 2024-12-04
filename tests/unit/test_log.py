@@ -1,5 +1,6 @@
+from datetime import datetime
 import logging
-from logging.handlers import TimedRotatingFileHandler
+from logging import FileHandler
 import os
 from pathlib import Path
 from shutil import rmtree
@@ -31,6 +32,8 @@ class TestSetFileHandler(unittest.TestCase):
         self.logger = log.get_logger(
             f"s3_upload_{uuid4().hex}", log_level=logging.INFO
         )
+        self.log_file = f"s3_upload.log.{datetime.now().strftime('%Y-%m-%d')}"
+
         log.set_file_handler(self.logger, Path(__file__).parent)
         self.logger.setLevel(5)
 
@@ -48,16 +51,10 @@ class TestSetFileHandler(unittest.TestCase):
             )
 
         file_handler = [
-            x
-            for x in self.logger.handlers
-            if isinstance(x, TimedRotatingFileHandler)
+            x for x in self.logger.handlers if isinstance(x, FileHandler)
         ]
 
-        with self.subTest("correct rotation time"):
-            self.assertEqual(file_handler[0].when, "MIDNIGHT")
-
-        with self.subTest("correct backup count"):
-            self.assertEqual(file_handler[0].backupCount, 5)
+        self.assertTrue(file_handler)
 
     def test_log_file_correctly_written_to(self):
         """
@@ -67,20 +64,20 @@ class TestSetFileHandler(unittest.TestCase):
         """
         self.logger.info("testing")
 
-        with open(os.path.join(Path(__file__).parent, "s3_upload.log")) as fh:
+        with open(os.path.join(Path(__file__).parent, self.log_file)) as fh:
             log_contents = fh.read()
 
         self.assertIn("INFO: testing", log_contents)
 
-    def test_setting_file_twice_returns_the_handler(self):
+    def test_setting_file_handler_twice_returns_the_handler(self):
 
         with patch(
-            "s3_upload.utils.log.check_write_permission_to_log_dir"
-        ) as mock_check:
+            "s3_upload.utils.log.logging.Handler.setFormatter"
+        ) as mock_file_handler:
             # test we hit the early return and don't continue through the function
             log.set_file_handler(self.logger, Path(__file__).parent)
 
-            self.assertEqual(mock_check.call_count, 0)
+            self.assertEqual(mock_file_handler.call_count, 0)
 
 
 class TestCheckWritePermissionToLogDir(unittest.TestCase):
